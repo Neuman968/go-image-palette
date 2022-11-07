@@ -8,6 +8,7 @@ import (
 	_ "image/png"
 	"log"
 	"os"
+	"sort"
 )
 
 type ColorCount struct {
@@ -17,7 +18,8 @@ type ColorCount struct {
 
 func main() {
 	// fmt.Println("Hello World!")
-	imgFile, err := os.Open("./red-f44242.png")
+	// imgFile, err := os.Open("./red-f44242.png")
+	imgFile, err := os.Open("./test-image.jpeg")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -28,49 +30,70 @@ func main() {
 	// fmt.Println(imgData)
 	fmt.Println(imgType)
 
-	colorMap := make(map[color.Color]int)
+	// colorMap := map[color.Color]*ColorCount{}
 
-	topColors := make(map[int]ColorCount)
+	colorMap := make(map[color.Color]ColorCount)
+	// topColors := make(map[int]ColorCount)
 
 	// Loop over image data.
 	for y := imgData.Bounds().Min.Y; y < imgData.Bounds().Max.Y; y++ {
 		for x := imgData.Bounds().Min.X; x < imgData.Bounds().Max.X; x++ {
 			color := imgData.At(x, y)
 			value, present := colorMap[color]
+
+			newCount := new(ColorCount)
+			newCount.rgbColor = color
 			if present {
-				colorMap[color] = value + 1
+				newCount.count = value.count + 1
 			} else {
-				colorMap[color] = 1
+				newCount.count = 1
 			}
+			colorMap[color] = *newCount
 		}
 	}
 	fmt.Printf("There are %d entries in the map", len(colorMap))
 
-	var maxColor color.Color
-	var maxCount int = 0
-	for k, v := range colorMap {
-		if v > maxCount {
-			maxColor = k
-			maxCount = v
-		}
+	sortedColors := make([]ColorCount, 0, len(colorMap))
+	for _, value := range colorMap {
+		sortedColors = append(sortedColors, value)
 	}
+
+	sort.Slice(sortedColors, func(i, j int) bool {
+		return sortedColors[i].count > sortedColors[j].count
+	})
+
+	for i := 0; i < 10; i++ {
+		fmt.Println("")
+		fmt.Printf("Appeared %d times", sortedColors[i].count)
+		fmt.Println("")
+		fmt.Println(sortedColors[i].rgbColor)
+	}
+
+	// var maxColor color.Color
+	// var maxCount int = 0
+	// for k, v := range colorMap {
+	// 	if v.count > maxCount {
+	// 		maxColor = k
+	// 		maxCount = v.rgbColor
+	// 	}
+	// }
 
 	// Calculate top 10 colors.
-	for key, value := range colorMap {
-		// init first place if not already set.
-		_, present := topColors[1]
-		if !present {
-			colorCount := new(ColorCount)
-			colorCount.count = value
-			colorCount.rgbColor = key
-			topColors[1] = *colorCount
-		}
+	// for key, value := range colorMap {
+	// 	// init first place if not already set.
+	// 	_, present := topColors[1]
+	// 	if !present {
+	// 		colorCount := new(ColorCount)
+	// 		colorCount.count = value
+	// 		colorCount.rgbColor = key
+	// 		topColors[1] = *colorCount
+	// 	}
 
-		for i := 1; i < 11; i++ {
-			currentColor, present := topColors[i]
+	// 	for i := 1; i < 11; i++ {
+	// 		currentColor, present := topColors[i]
 
-		}
-	}
+	// 	}
+	// }
 
 	// r, g, b, a := maxColor.RGBA()
 
