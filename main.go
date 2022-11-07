@@ -23,17 +23,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	imgData, imgType, err := image.Decode(imgFile)
+	imgData, _, err := image.Decode(imgFile)
 	if err != nil {
 		fmt.Println(err)
 	}
-	// fmt.Println(imgData)
-	fmt.Println(imgType)
-
-	// colorMap := map[color.Color]*ColorCount{}
 
 	colorMap := make(map[color.Color]ColorCount)
-	// topColors := make(map[int]ColorCount)
 
 	// Loop over image data.
 	for y := imgData.Bounds().Min.Y; y < imgData.Bounds().Max.Y; y++ {
@@ -62,11 +57,16 @@ func main() {
 		return sortedColors[i].count > sortedColors[j].count
 	})
 
+	// Print Top 10
 	for i := 0; i < 10; i++ {
 		fmt.Println("")
-		fmt.Printf("Appeared %d times", sortedColors[i].count)
-		fmt.Println("")
-		fmt.Println(sortedColors[i].rgbColor)
+		convertedColor := color.RGBAModel.Convert(sortedColors[i].rgbColor).(color.RGBA)
+		fmt.Printf("rgb(%d,%d,%d) a: %d appeared %d times",
+			convertedColor.R,
+			convertedColor.G,
+			convertedColor.B,
+			convertedColor.A,
+			sortedColors[i].count)
 	}
 
 	// var maxColor color.Color
