@@ -20,10 +20,40 @@ type HSL struct {
 // Contains a reference to the RGBA image content as well as the number of times it occurs.
 //
 type ColorCount struct {
-	color color.Color
-	rgba  color.RGBA
-	hsl   HSL
-	count int
+	color    color.Color
+	rgba     color.RGBA
+	hsl      HSL
+	count    int
+	category int
+}
+
+// var colorPoints = map[int]color.RGBA{
+// 	red:    color.RGBA{R: 254, G: 0, B: 0, A: 0},
+// 	green:  color.RGBA{R: 0, G: 128, B: 2},
+// 	blue:   color.RGBA{R: 19, G: 0, B: 255},
+// 	yellow: color.RGBA{R: 0, G: 254, B: 254},
+// 	orange: color.RGBA{R: 255, G: 165, B: 0},
+// 	purple: color.RGBA{R: 128, G: 0, B: 128},
+// 	black:  color.RGBA{R: 0, G: 0, B: 0},
+// 	white:  color.RGBA{R: 255, G: 255, B: 255},
+// 	brown:  color.RGBA{R: 165, G: 42, B: 42},
+// 	gray:   color.RGBA{R: 128, G: 128, B: 128},
+// 	pink:   color.RGBA{R: 0, G: 128, B: 2},
+// }
+
+// Display native values..
+var colorPoints = map[int]color.RGBA{
+	red:    color.RGBA{R: 234, G: 50, B: 35},
+	green:  color.RGBA{R: 55, G: 125, B: 34},
+	blue:   color.RGBA{R: 0, G: 30, B: 245},
+	yellow: color.RGBA{R: 255, G: 253, B: 84},
+	orange: color.RGBA{R: 255, G: 165, B: 0},
+	purple: color.RGBA{R: 177, G: 25, B: 124},
+	black:  color.RGBA{R: 0, G: 0, B: 0},
+	white:  color.RGBA{R: 255, G: 255, B: 255},
+	brown:  color.RGBA{R: 152, G: 52, B: 48},
+	gray:   color.RGBA{R: 128, G: 128, B: 128},
+	pink:   color.RGBA{R: 245, G: 194, B: 203},
 }
 
 // color categories as defined by me.
@@ -38,6 +68,7 @@ const (
 	purple     = 8
 	orange     = 9
 	brown      = 10
+	pink       = 11
 )
 
 func main() {
@@ -60,7 +91,7 @@ func main() {
 			color := imgData.At(x, y)
 			value, present := colorMap[color]
 			count := 1
-			
+
 			if present {
 				count = value.count + 1
 			}
@@ -82,12 +113,13 @@ func main() {
 	for i := 0; i < 10; i++ {
 		fmt.Println("")
 		convertedColor := color.RGBAModel.Convert(sortedColors[i].color).(color.RGBA)
-		fmt.Printf("rgb(%d,%d,%d) a: %d appeared %d times",
+		fmt.Printf("rgb(%d,%d,%d) a: %d appeared %d times %s",
 			convertedColor.R,
 			convertedColor.G,
 			convertedColor.B,
 			convertedColor.A,
-			sortedColors[i].count)
+			sortedColors[i].count,
+			sortedColors[i].category)
 	}
 
 	// var maxColor color.Color
@@ -142,7 +174,25 @@ func toColorStruct(count int, colorVal color.Color) ColorCount {
 	colorStruct.count = count
 	colorStruct.rgba = color.RGBAModel.Convert(colorVal).(color.RGBA)
 	colorStruct.hsl = ToHSL(float64(colorStruct.rgba.R), float64(colorStruct.rgba.G), float64(colorStruct.rgba.B))
+	colorStruct.category = getColorCategory(colorStruct.rgba)
 	return *colorStruct
+}
+
+func getColorCategory(color color.RGBA) int {
+	var lowestCat = red
+	var shortestDistance = float64(-1)
+	for key, value := range colorPoints {
+		dist := getRgbDistance(value, color)
+		if shortestDistance == -1 || dist < shortestDistance {
+			lowestCat = key
+			shortestDistance = dist
+		}
+	}
+	return lowestCat
+}
+
+func getRgbDistance(rgb1, rgb2 color.RGBA) float64 {
+	return math.Sqrt(math.Pow(float64(rgb2.R)-float64(rgb1.R), 2) + math.Pow(float64(rgb2.G)-float64(rgb1.G), 2) + math.Pow(float64(rgb2.B)-float64(rgb1.B), 2))
 }
 
 /**
