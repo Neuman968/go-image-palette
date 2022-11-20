@@ -27,6 +27,21 @@ type ColorCount struct {
 	category int
 }
 
+type TopColors struct {
+	red    []ColorCount
+	green  []ColorCount
+	blue   []ColorCount
+	yellow []ColorCount
+	orange []ColorCount
+	purple []ColorCount
+	black  []ColorCount
+	white  []ColorCount
+	brown  []ColorCount
+	gray   []ColorCount
+	pink   []ColorCount
+}
+
+// sRGB values.
 // var colorPoints = map[int]color.RGBA{
 // 	red:    color.RGBA{R: 254, G: 0, B: 0, A: 0},
 // 	green:  color.RGBA{R: 0, G: 128, B: 2},
@@ -56,6 +71,8 @@ var colorPoints = map[int]color.RGBA{
 	pink:   color.RGBA{R: 245, G: 194, B: 203},
 }
 
+var colorMap = make(map[int]map[color.Color]ColorCount)
+
 // color categories as defined by me.
 const (
 	red    int = 0
@@ -83,95 +100,109 @@ func main() {
 		fmt.Println(err)
 	}
 
-	colorMap := make(map[color.Color]ColorCount)
+	// colorMap := make(map[color.Color]ColorCount)
+	colorMap[red] = make(map[color.Color]ColorCount)
+	colorMap[green] = make(map[color.Color]ColorCount)
+	colorMap[blue] = make(map[color.Color]ColorCount)
+	colorMap[yellow] = make(map[color.Color]ColorCount)
+	colorMap[orange] = make(map[color.Color]ColorCount)
+	colorMap[purple] = make(map[color.Color]ColorCount)
+	colorMap[black] = make(map[color.Color]ColorCount)
+	colorMap[white] = make(map[color.Color]ColorCount)
+	colorMap[brown] = make(map[color.Color]ColorCount)
+	colorMap[gray] = make(map[color.Color]ColorCount)
+	colorMap[pink] = make(map[color.Color]ColorCount)
 
 	// Loop over image data.
 	for y := imgData.Bounds().Min.Y; y < imgData.Bounds().Max.Y; y++ {
 		for x := imgData.Bounds().Min.X; x < imgData.Bounds().Max.X; x++ {
 			color := imgData.At(x, y)
-			value, present := colorMap[color]
+			colorStruct := toColorStruct(color)
+			value, present := colorMap[colorStruct.category][color]
 			count := 1
-
 			if present {
 				count = value.count + 1
 			}
-			colorMap[color] = toColorStruct(count, color)
+
+			colorStruct.count = count
+			colorMap[colorStruct.category][color] = colorStruct
 		}
 	}
+
 	fmt.Printf("There are %d entries in the map", len(colorMap))
 
-	sortedColors := make([]ColorCount, 0, len(colorMap))
-	for _, value := range colorMap {
-		sortedColors = append(sortedColors, value)
-	}
+	// todo maybe do this in goroutines?
+	printTop("red", getSortedDict(red))
+	printTop("green", getSortedDict(green))
+	printTop("blue", getSortedDict(blue))
+	printTop("yellow", getSortedDict(yellow))
+	printTop("orange", getSortedDict(orange))
+	printTop("purple", getSortedDict(purple))
+	printTop("black", getSortedDict(black))
+	printTop("white", getSortedDict(white))
+	printTop("brown", getSortedDict(brown))
+	printTop("gray", getSortedDict(gray))
+	printTop("pink", getSortedDict(pink))
 
-	sort.Slice(sortedColors, func(i, j int) bool {
-		return sortedColors[i].count > sortedColors[j].count
-	})
-
-	// Print Top 10
-	for i := 0; i < 10; i++ {
-		fmt.Println("")
-		convertedColor := color.RGBAModel.Convert(sortedColors[i].color).(color.RGBA)
-		fmt.Printf("rgb(%d,%d,%d) a: %d appeared %d times %s",
-			convertedColor.R,
-			convertedColor.G,
-			convertedColor.B,
-			convertedColor.A,
-			sortedColors[i].count,
-			sortedColors[i].category)
-	}
-
-	// var maxColor color.Color
-	// var maxCount int = 0
-	// for k, v := range colorMap {
-	// 	if v.count > maxCount {
-	// 		maxColor = k
-	// 		maxCount = v.rgbColor
-	// 	}
+	// sortedColors := make([]ColorCount, 0, len(colorMap))
+	// for _, value := range colorMap {
+	// 	sortedColors = append(sortedColors, value)
 	// }
 
-	// Calculate top 10 colors.
-	// for key, value := range colorMap {
-	// 	// init first place if not already set.
-	// 	_, present := topColors[1]
-	// 	if !present {
-	// 		colorCount := new(ColorCount)
-	// 		colorCount.count = value
-	// 		colorCount.rgbColor = key
-	// 		topColors[1] = *colorCount
-	// 	}
+	// sort.Slice(sortedColors, func(i, j int) bool {
+	// 	return sortedColors[i].count > sortedColors[j].count
+	// })
 
-	// 	for i := 1; i < 11; i++ {
-	// 		currentColor, present := topColors[i]
-
-	// 	}
+	// // Print Top 10
+	// for i := 0; i < 10; i++ {
+	// 	fmt.Println("")
+	// 	convertedColor := color.RGBAModel.Convert(sortedColors[i].color).(color.RGBA)
+	// 	fmt.Printf("rgb(%d,%d,%d) a: %d appeared %d times %s",
+	// 		convertedColor.R,
+	// 		convertedColor.G,
+	// 		convertedColor.B,
+	// 		convertedColor.A,
+	// 		sortedColors[i].count,
+	// 		sortedColors[i].category)
 	// }
 
-	// r, g, b, a := maxColor.RGBA()
-
-	// converted := color.RGBAModel.Convert(maxColor).(color.RGBA)
-
-	// fmt.Println("")
-	// fmt.Println(maxColor)
-	// fmt.Println("")
-	// fmt.Println(maxColor.RGBA())
-	// // color.Model.Convert(maxColor).RGBA()
-	// // color.Model.Convert(color.NRGBAModel)
-	// fmt.Println("Printing hex color...")
-	// fmt.Printf("#%02x%02x%02x", r, g, b)
-	// fmt.Println("")
-	// fmt.Printf("The most common color was %d %d %d %d occurred %d times", r, g, b, a, maxCount)
-	// fmt.Println("")
-	// fmt.Printf("converted.. rgba(%d,%d,%d,%d) occurred %d times", r/257, g/257, b/257, a/257, maxCount)
-	// fmt.Println("Getting color")
-	// fmt.Printf("rgb(%d,%d,%d)", converted.R, converted.G, converted.B)
 }
 
-func toColorStruct(count int, colorVal color.Color) ColorCount {
+func printTop(name string, dict []ColorCount) {
+	limit := 10
+	if len(dict) < limit {
+		limit = len(dict)
+	}
+	fmt.Printf("Top %s colors size %d", name, len(dict))
+	fmt.Println("")
+
+	for i := 0; i < limit; i++ {
+		fmt.Printf("rgb(%d,%d,%d) a: %d appeared %d times",
+			dict[i].rgba.R,
+			dict[i].rgba.G,
+			dict[i].rgba.B,
+			dict[i].rgba.A,
+			dict[i].count)
+		fmt.Println("")
+	}
+	fmt.Println("")
+}
+
+func getSortedDict(category int) []ColorCount {
+	sortedColor := make([]ColorCount, 0, len(colorMap[category]))
+	for _, value := range colorMap[category] {
+		sortedColor = append(sortedColor, value)
+	}
+	sort.Slice(sortedColor, func(i, j int) bool {
+		return sortedColor[i].count > sortedColor[j].count
+	})
+	return sortedColor
+}
+
+func toColorStruct(colorVal color.Color) ColorCount {
 	colorStruct := new(ColorCount)
 	colorStruct.color = colorVal
-	colorStruct.count = count
+	colorStruct.count = 0
 	colorStruct.rgba = color.RGBAModel.Convert(colorVal).(color.RGBA)
 	colorStruct.hsl = ToHSL(float64(colorStruct.rgba.R), float64(colorStruct.rgba.G), float64(colorStruct.rgba.B))
 	colorStruct.category = getColorCategory(colorStruct.rgba)
