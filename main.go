@@ -13,16 +13,11 @@ import (
 	"sort"
 )
 
-type HSL struct {
-	H, S, L float64
-}
-
 // Contains a reference to the RGBA image content as well as the number of times it occurs.
 //
 type ColorCount struct {
 	color    color.Color
 	rgba     color.RGBA
-	hsl      HSL
 	count    int
 	category int
 }
@@ -143,29 +138,6 @@ func main() {
 	printTop("brown", getSortedDict(brown))
 	printTop("gray", getSortedDict(gray))
 	printTop("pink", getSortedDict(pink))
-
-	// sortedColors := make([]ColorCount, 0, len(colorMap))
-	// for _, value := range colorMap {
-	// 	sortedColors = append(sortedColors, value)
-	// }
-
-	// sort.Slice(sortedColors, func(i, j int) bool {
-	// 	return sortedColors[i].count > sortedColors[j].count
-	// })
-
-	// // Print Top 10
-	// for i := 0; i < 10; i++ {
-	// 	fmt.Println("")
-	// 	convertedColor := color.RGBAModel.Convert(sortedColors[i].color).(color.RGBA)
-	// 	fmt.Printf("rgb(%d,%d,%d) a: %d appeared %d times %s",
-	// 		convertedColor.R,
-	// 		convertedColor.G,
-	// 		convertedColor.B,
-	// 		convertedColor.A,
-	// 		sortedColors[i].count,
-	// 		sortedColors[i].category)
-	// }
-
 }
 
 func printTop(name string, dict []ColorCount) {
@@ -204,7 +176,6 @@ func toColorStruct(colorVal color.Color) ColorCount {
 	colorStruct.color = colorVal
 	colorStruct.count = 0
 	colorStruct.rgba = color.RGBAModel.Convert(colorVal).(color.RGBA)
-	colorStruct.hsl = ToHSL(float64(colorStruct.rgba.R), float64(colorStruct.rgba.G), float64(colorStruct.rgba.B))
 	colorStruct.category = getColorCategory(colorStruct.rgba)
 	return *colorStruct
 }
@@ -224,54 +195,4 @@ func getColorCategory(color color.RGBA) int {
 
 func getRgbDistance(rgb1, rgb2 color.RGBA) float64 {
 	return math.Sqrt(math.Pow(float64(rgb2.R)-float64(rgb1.R), 2) + math.Pow(float64(rgb2.G)-float64(rgb1.G), 2) + math.Pow(float64(rgb2.B)-float64(rgb1.B), 2))
-}
-
-/**
-To HSL level from ...
-*/
-func ToHSL(r, g, b float64) HSL {
-	var h, s, l float64
-
-	max := math.Max(math.Max(r, g), b)
-	min := math.Min(math.Min(r, g), b)
-
-	// Luminosity is the average of the max and min rgb color intensities.
-	l = (max + min) / 2
-
-	// saturation
-	delta := max - min
-	if delta == 0 {
-		// it's gray
-		return HSL{0, 0, l}
-	}
-
-	// it's not gray
-	if l < 0.5 {
-		s = delta / (max + min)
-	} else {
-		s = delta / (2 - max - min)
-	}
-
-	// hue
-	r2 := (((max - r) / 6) + (delta / 2)) / delta
-	g2 := (((max - g) / 6) + (delta / 2)) / delta
-	b2 := (((max - b) / 6) + (delta / 2)) / delta
-	switch {
-	case r == max:
-		h = b2 - g2
-	case g == max:
-		h = (1.0 / 3.0) + r2 - b2
-	case b == max:
-		h = (2.0 / 3.0) + g2 - r2
-	}
-
-	// fix wraparounds
-	switch {
-	case h < 0:
-		h += 1
-	case h > 1:
-		h -= 1
-	}
-
-	return HSL{h, s, l}
 }
