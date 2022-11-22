@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	_ "encoding/json"
 	"fmt"
 	"image"
@@ -20,6 +21,20 @@ type ColorCount struct {
 	rgba     color.RGBA
 	count    int
 	category int
+}
+
+type ResultColors struct {
+	Red    []color.RGBA
+	Green  []color.RGBA
+	Blue   []color.RGBA
+	Yellow []color.RGBA
+	Orange []color.RGBA
+	Purple []color.RGBA
+	Black  []color.RGBA
+	White  []color.RGBA
+	Brown  []color.RGBA
+	Gray   []color.RGBA
+	Pink   []color.RGBA
 }
 
 type TopColors struct {
@@ -124,20 +139,23 @@ func main() {
 		}
 	}
 
-	fmt.Printf("There are %d entries in the map", len(colorMap))
+	// fmt.Printf("There are %d entries in the map", len(colorMap))
+	result := &ResultColors{
+		Red:    getResultSlice(getSortedDict(red), 10),
+		Green:  getResultSlice(getSortedDict(green), 10),
+		Blue:   getResultSlice(getSortedDict(blue), 10),
+		Yellow: getResultSlice(getSortedDict(yellow), 10),
+		Orange: getResultSlice(getSortedDict(orange), 10),
+		Purple: getResultSlice(getSortedDict(purple), 10),
+		Black:  getResultSlice(getSortedDict(black), 10),
+		White:  getResultSlice(getSortedDict(white), 10),
+		Brown:  getResultSlice(getSortedDict(brown), 10),
+		Gray:   getResultSlice(getSortedDict(gray), 10),
+		Pink:   getResultSlice(getSortedDict(pink), 10),
+	}
 
-	// todo maybe do this in goroutines?
-	printTop("red", getSortedDict(red))
-	printTop("green", getSortedDict(green))
-	printTop("blue", getSortedDict(blue))
-	printTop("yellow", getSortedDict(yellow))
-	printTop("orange", getSortedDict(orange))
-	printTop("purple", getSortedDict(purple))
-	printTop("black", getSortedDict(black))
-	printTop("white", getSortedDict(white))
-	printTop("brown", getSortedDict(brown))
-	printTop("gray", getSortedDict(gray))
-	printTop("pink", getSortedDict(pink))
+	binary, err := json.Marshal(result)
+	fmt.Println(string(binary))
 }
 
 func printTop(name string, dict []ColorCount) {
@@ -169,6 +187,19 @@ func getSortedDict(category int) []ColorCount {
 		return sortedColor[i].count > sortedColor[j].count
 	})
 	return sortedColor
+}
+
+//
+func getResultSlice(colors []ColorCount, size int) []color.RGBA {
+	safeSize := size
+	if len(colors) < size {
+		safeSize = len(colors)
+	}
+	results := make([]color.RGBA, 0, safeSize)
+	for i := 0; i < safeSize; i++ {
+		results = append(results, colors[i].rgba)
+	}
+	return results
 }
 
 func toColorStruct(colorVal color.Color) ColorCount {
