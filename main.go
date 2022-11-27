@@ -101,7 +101,7 @@ const (
 func main() {
 	// fmt.Println("Hello World!")
 	// imgFile, err := os.Open("./red-f44242.png")
-	imgFile, err := os.Open("./test-image.jpeg")
+	imgFile, err := os.Open("./test-image.png")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -189,7 +189,6 @@ func getSortedDict(category int) []ColorCount {
 	return sortedColor
 }
 
-//
 func getResultSlice(colors []ColorCount, size int) []color.RGBA {
 	safeSize := size
 	if len(colors) < size {
