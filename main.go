@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	_ "encoding/json"
+	"flag"
 	"fmt"
 	"image"
 	"image/color"
@@ -101,7 +101,11 @@ const (
 func main() {
 	// fmt.Println("Hello World!")
 	// imgFile, err := os.Open("./red-f44242.png")
-	imgFile, err := os.Open("./test-image.png")
+	var imgFileName = flag.String("i", "", "-i <path-to-image>")
+
+	flag.Parse()
+
+	imgFile, err := os.Open(*imgFileName)
 	if err != nil {
 		log.Fatal(err)
 	}
