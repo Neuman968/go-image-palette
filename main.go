@@ -168,26 +168,6 @@ func main() {
 	fmt.Println(string(binary))
 }
 
-func printTop(name string, dict []ColorStruct) {
-	limit := 10
-	if len(dict) < limit {
-		limit = len(dict)
-	}
-	fmt.Printf("Top %s colors size %d", name, len(dict))
-	fmt.Println("")
-
-	for i := 0; i < limit; i++ {
-		fmt.Printf("rgb(%d,%d,%d) a: %d appeared %d times",
-			dict[i].rgba.R,
-			dict[i].rgba.G,
-			dict[i].rgba.B,
-			dict[i].rgba.A,
-			dict[i].Count)
-		fmt.Println("")
-	}
-	fmt.Println("")
-}
-
 func getSortedDict(category int) []ColorStruct {
 	sortedColor := make([]ColorStruct, 0, len(colorMap[category]))
 	for _, value := range colorMap[category] {
