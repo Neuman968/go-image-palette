@@ -16,39 +16,45 @@ import (
 
 // Contains a reference to the RGBA image content as well as the number of times it occurs.
 //
-type ColorCount struct {
+type ColorStruct struct {
 	color    color.Color
 	rgba     color.RGBA
-	count    int
 	category int
+	R        uint8
+	G        uint8
+	B        uint8
+	A        uint8
+	Count    int
 }
 
 type ResultColors struct {
-	Red    []color.RGBA
-	Green  []color.RGBA
-	Blue   []color.RGBA
-	Yellow []color.RGBA
-	Orange []color.RGBA
-	Purple []color.RGBA
-	Black  []color.RGBA
-	White  []color.RGBA
-	Brown  []color.RGBA
-	Gray   []color.RGBA
-	Pink   []color.RGBA
+	Red       []ColorStruct
+	Green     []ColorStruct
+	Blue      []ColorStruct
+	Yellow    []ColorStruct
+	Orange    []ColorStruct
+	Purple    []ColorStruct
+	Black     []ColorStruct
+	White     []ColorStruct
+	Brown     []ColorStruct
+	Gray      []ColorStruct
+	Pink      []ColorStruct
+	primary   ColorStruct
+	secondary ColorStruct
 }
 
 type TopColors struct {
-	red    []ColorCount
-	green  []ColorCount
-	blue   []ColorCount
-	yellow []ColorCount
-	orange []ColorCount
-	purple []ColorCount
-	black  []ColorCount
-	white  []ColorCount
-	brown  []ColorCount
-	gray   []ColorCount
-	pink   []ColorCount
+	red    []ColorStruct
+	green  []ColorStruct
+	blue   []ColorStruct
+	yellow []ColorStruct
+	orange []ColorStruct
+	purple []ColorStruct
+	black  []ColorStruct
+	white  []ColorStruct
+	brown  []ColorStruct
+	gray   []ColorStruct
+	pink   []ColorStruct
 }
 
 // sRGB values.
@@ -81,7 +87,7 @@ var colorPoints = map[int]color.RGBA{
 	pink:   color.RGBA{R: 245, G: 194, B: 203},
 }
 
-var colorMap = make(map[int]map[color.Color]ColorCount)
+var colorMap = make(map[int]map[color.Color]ColorStruct)
 
 // color categories as defined by me.
 const (
@@ -115,17 +121,17 @@ func main() {
 	}
 
 	// colorMap := make(map[color.Color]ColorCount)
-	colorMap[red] = make(map[color.Color]ColorCount)
-	colorMap[green] = make(map[color.Color]ColorCount)
-	colorMap[blue] = make(map[color.Color]ColorCount)
-	colorMap[yellow] = make(map[color.Color]ColorCount)
-	colorMap[orange] = make(map[color.Color]ColorCount)
-	colorMap[purple] = make(map[color.Color]ColorCount)
-	colorMap[black] = make(map[color.Color]ColorCount)
-	colorMap[white] = make(map[color.Color]ColorCount)
-	colorMap[brown] = make(map[color.Color]ColorCount)
-	colorMap[gray] = make(map[color.Color]ColorCount)
-	colorMap[pink] = make(map[color.Color]ColorCount)
+	colorMap[red] = make(map[color.Color]ColorStruct)
+	colorMap[green] = make(map[color.Color]ColorStruct)
+	colorMap[blue] = make(map[color.Color]ColorStruct)
+	colorMap[yellow] = make(map[color.Color]ColorStruct)
+	colorMap[orange] = make(map[color.Color]ColorStruct)
+	colorMap[purple] = make(map[color.Color]ColorStruct)
+	colorMap[black] = make(map[color.Color]ColorStruct)
+	colorMap[white] = make(map[color.Color]ColorStruct)
+	colorMap[brown] = make(map[color.Color]ColorStruct)
+	colorMap[gray] = make(map[color.Color]ColorStruct)
+	colorMap[pink] = make(map[color.Color]ColorStruct)
 
 	// Loop over image data.
 	for y := imgData.Bounds().Min.Y; y < imgData.Bounds().Max.Y; y++ {
@@ -135,10 +141,10 @@ func main() {
 			value, present := colorMap[colorStruct.category][color]
 			count := 1
 			if present {
-				count = value.count + 1
+				count = value.Count + 1
 			}
 
-			colorStruct.count = count
+			colorStruct.Count = count
 			colorMap[colorStruct.category][color] = colorStruct
 		}
 	}
@@ -162,7 +168,7 @@ func main() {
 	fmt.Println(string(binary))
 }
 
-func printTop(name string, dict []ColorCount) {
+func printTop(name string, dict []ColorStruct) {
 	limit := 10
 	if len(dict) < limit {
 		limit = len(dict)
@@ -176,39 +182,35 @@ func printTop(name string, dict []ColorCount) {
 			dict[i].rgba.G,
 			dict[i].rgba.B,
 			dict[i].rgba.A,
-			dict[i].count)
+			dict[i].Count)
 		fmt.Println("")
 	}
 	fmt.Println("")
 }
 
-func getSortedDict(category int) []ColorCount {
-	sortedColor := make([]ColorCount, 0, len(colorMap[category]))
+func getSortedDict(category int) []ColorStruct {
+	sortedColor := make([]ColorStruct, 0, len(colorMap[category]))
 	for _, value := range colorMap[category] {
 		sortedColor = append(sortedColor, value)
 	}
 	sort.Slice(sortedColor, func(i, j int) bool {
-		return sortedColor[i].count > sortedColor[j].count
+		return sortedColor[i].Count > sortedColor[j].Count
 	})
 	return sortedColor
 }
 
-func getResultSlice(colors []ColorCount, size int) []color.RGBA {
-	safeSize := size
+func getResultSlice(colors []ColorStruct, size int) []ColorStruct {
+	safeLength := size
 	if len(colors) < size {
-		safeSize = len(colors)
+		safeLength = len(colors)
 	}
-	results := make([]color.RGBA, 0, safeSize)
-	for i := 0; i < safeSize; i++ {
-		results = append(results, colors[i].rgba)
-	}
-	return results
+	return colors[0:safeLength]
 }
 
-func toColorStruct(colorVal color.Color) ColorCount {
-	colorStruct := new(ColorCount)
+func toColorStruct(colorVal color.Color) ColorStruct {
+	colorStruct := new(ColorStruct)
 	colorStruct.color = colorVal
-	colorStruct.count = 0
+	colorStruct.Count = 0
 	colorStruct.rgba = color.RGBAModel.Convert(colorVal).(color.RGBA)
 	colorStruct.category = getColorCategory(colorStruct.rgba)
 	return *colorStruct
