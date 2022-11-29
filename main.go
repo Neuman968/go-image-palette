@@ -39,8 +39,8 @@ type ResultColors struct {
 	Brown     []ColorStruct
 	Gray      []ColorStruct
 	Pink      []ColorStruct
-	primary   ColorStruct
-	secondary ColorStruct
+	Primary   ColorStruct
+	Secondary ColorStruct
 }
 
 type TopColors struct {
@@ -133,6 +133,8 @@ func main() {
 	colorMap[gray] = make(map[color.Color]ColorStruct)
 	colorMap[pink] = make(map[color.Color]ColorStruct)
 
+	var largest ColorStruct
+
 	// Loop over image data.
 	for y := imgData.Bounds().Min.Y; y < imgData.Bounds().Max.Y; y++ {
 		for x := imgData.Bounds().Min.X; x < imgData.Bounds().Max.X; x++ {
@@ -143,25 +145,33 @@ func main() {
 			if present {
 				count = value.Count + 1
 			}
-
 			colorStruct.Count = count
+			colorStruct.R = colorStruct.rgba.R
+			colorStruct.G = colorStruct.rgba.G
+			colorStruct.B = colorStruct.rgba.B
+			colorStruct.A = colorStruct.rgba.A
+			if (ColorStruct{} == largest || largest.Count < count) {
+				largest = colorStruct
+			}
+
 			colorMap[colorStruct.category][color] = colorStruct
 		}
 	}
 
 	// fmt.Printf("There are %d entries in the map", len(colorMap))
 	result := &ResultColors{
-		Red:    getResultSlice(getSortedDict(red), 10),
-		Green:  getResultSlice(getSortedDict(green), 10),
-		Blue:   getResultSlice(getSortedDict(blue), 10),
-		Yellow: getResultSlice(getSortedDict(yellow), 10),
-		Orange: getResultSlice(getSortedDict(orange), 10),
-		Purple: getResultSlice(getSortedDict(purple), 10),
-		Black:  getResultSlice(getSortedDict(black), 10),
-		White:  getResultSlice(getSortedDict(white), 10),
-		Brown:  getResultSlice(getSortedDict(brown), 10),
-		Gray:   getResultSlice(getSortedDict(gray), 10),
-		Pink:   getResultSlice(getSortedDict(pink), 10),
+		Red:     getResultSlice(getSortedDict(red), 10),
+		Green:   getResultSlice(getSortedDict(green), 10),
+		Blue:    getResultSlice(getSortedDict(blue), 10),
+		Yellow:  getResultSlice(getSortedDict(yellow), 10),
+		Orange:  getResultSlice(getSortedDict(orange), 10),
+		Purple:  getResultSlice(getSortedDict(purple), 10),
+		Black:   getResultSlice(getSortedDict(black), 10),
+		White:   getResultSlice(getSortedDict(white), 10),
+		Brown:   getResultSlice(getSortedDict(brown), 10),
+		Gray:    getResultSlice(getSortedDict(gray), 10),
+		Pink:    getResultSlice(getSortedDict(pink), 10),
+		Primary: largest,
 	}
 
 	binary, err := json.Marshal(result)
