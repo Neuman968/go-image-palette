@@ -120,7 +120,6 @@ func main() {
 		fmt.Println(err)
 	}
 
-	// colorMap := make(map[color.Color]ColorCount)
 	colorMap[red] = make(map[color.Color]ColorStruct)
 	colorMap[green] = make(map[color.Color]ColorStruct)
 	colorMap[blue] = make(map[color.Color]ColorStruct)
