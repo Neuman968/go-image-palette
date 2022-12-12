@@ -75,19 +75,30 @@ type TopColors struct {
 // Display native values..
 var colorPoints = map[int]color.RGBA{
 	red:    color.RGBA{R: 234, G: 50, B: 35},
-	green:  color.RGBA{R: 55, G: 125, B: 34},
+	green:  color.RGBA{R: 77, G: 169, B: 58},
 	blue:   color.RGBA{R: 0, G: 30, B: 245},
 	yellow: color.RGBA{R: 255, G: 253, B: 84},
 	orange: color.RGBA{R: 255, G: 165, B: 0},
 	purple: color.RGBA{R: 177, G: 25, B: 124},
 	black:  color.RGBA{R: 0, G: 0, B: 0},
 	white:  color.RGBA{R: 255, G: 255, B: 255},
-	brown:  color.RGBA{R: 152, G: 52, B: 48},
-	gray:   color.RGBA{R: 128, G: 128, B: 128},
-	pink:   color.RGBA{R: 245, G: 194, B: 203},
+	brown:  color.RGBA{R: 98, G: 56, B: 16},
+	gray:   color.RGBA{R: 147, G: 149, B: 145},
+	pink:   color.RGBA{R: 239, G: 139, B: 189},
 }
 
 var colorMap = make(map[int]map[color.Color]ColorStruct)
+
+/*
+employeeSalary := map[string]int{
+"John": 1000
+"Sam": 2000
+}
+*/
+
+var complementColors = map[int]int{
+	red: blue,
+}
 
 // color categories as defined by me.
 const (
@@ -137,9 +148,9 @@ func main() {
 	// Loop over image data.
 	for y := imgData.Bounds().Min.Y; y < imgData.Bounds().Max.Y; y++ {
 		for x := imgData.Bounds().Min.X; x < imgData.Bounds().Max.X; x++ {
-			color := imgData.At(x, y)
-			colorStruct := toColorStruct(color)
-			value, present := colorMap[colorStruct.category][color]
+			colr := imgData.At(x, y)
+			colorStruct := toColorStruct(colr)
+			value, present := colorMap[colorStruct.category][colr]
 			count := 1
 			if present {
 				count = value.Count + 1
@@ -153,7 +164,7 @@ func main() {
 				largest = colorStruct
 			}
 
-			colorMap[colorStruct.category][color] = colorStruct
+			colorMap[colorStruct.category][colr] = colorStruct
 		}
 	}
 
@@ -176,6 +187,10 @@ func main() {
 	binary, err := json.Marshal(result)
 	fmt.Println(string(binary))
 }
+
+// func getSecondaryColor(largest: ColorStruct) {
+
+// }
 
 func getSortedDict(category int) []ColorStruct {
 	sortedColor := make([]ColorStruct, 0, len(colorMap[category]))
