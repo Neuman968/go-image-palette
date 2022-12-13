@@ -9,9 +9,10 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"log"
-	"math"
 	"os"
 	"sort"
+
+	"github.com/mattn/go-ciede2000"
 )
 
 // Contains a reference to the RGBA image content as well as the number of times it occurs.
@@ -234,5 +235,6 @@ func getColorCategory(color color.RGBA) int {
 }
 
 func getRgbDistance(rgb1, rgb2 color.RGBA) float64 {
-	return math.Sqrt(math.Pow(float64(rgb2.R)-float64(rgb1.R), 2) + math.Pow(float64(rgb2.G)-float64(rgb1.G), 2) + math.Pow(float64(rgb2.B)-float64(rgb1.B), 2))
+	// return math.Sqrt(math.Pow(float64(rgb2.R)-float64(rgb1.R), 2) + math.Pow(float64(rgb2.G)-float64(rgb1.G), 2) + math.Pow(float64(rgb2.B)-float64(rgb1.B), 2))
+	return ciede2000.Diff(rgb1, rgb2)
 }
