@@ -15,6 +15,8 @@ import (
 	"github.com/mattn/go-ciede2000"
 )
 
+const numberOfColors = 20
+
 // Contains a reference to the RGBA image content as well as the number of times it occurs.
 //
 type ColorStruct struct {
@@ -228,17 +230,17 @@ func main() {
 
 	// fmt.Printf("There are %d entries in the map", len(colorMap))
 	result := &ResultColors{
-		Red:     getResultSlice(getSortedDict(red), 10),
-		Green:   getResultSlice(getSortedDict(green), 10),
-		Blue:    getResultSlice(getSortedDict(blue), 10),
-		Yellow:  getResultSlice(getSortedDict(yellow), 10),
-		Orange:  getResultSlice(getSortedDict(orange), 10),
-		Purple:  getResultSlice(getSortedDict(purple), 10),
-		Black:   getResultSlice(getSortedDict(black), 10),
-		White:   getResultSlice(getSortedDict(white), 10),
-		Brown:   getResultSlice(getSortedDict(brown), 10),
-		Gray:    getResultSlice(getSortedDict(gray), 10),
-		Pink:    getResultSlice(getSortedDict(pink), 10),
+		Red:     getResultSlice(getSortedDict(red), numberOfColors),
+		Green:   getResultSlice(getSortedDict(green), numberOfColors),
+		Blue:    getResultSlice(getSortedDict(blue), numberOfColors),
+		Yellow:  getResultSlice(getSortedDict(yellow), numberOfColors),
+		Orange:  getResultSlice(getSortedDict(orange), numberOfColors),
+		Purple:  getResultSlice(getSortedDict(purple), numberOfColors),
+		Black:   getResultSlice(getSortedDict(black), numberOfColors),
+		White:   getResultSlice(getSortedDict(white), numberOfColors),
+		Brown:   getResultSlice(getSortedDict(brown), numberOfColors),
+		Gray:    getResultSlice(getSortedDict(gray), numberOfColors),
+		Pink:    getResultSlice(getSortedDict(pink), numberOfColors),
 		Primary: largest,
 	}
 
