@@ -74,18 +74,75 @@ type TopColors struct {
 // }
 
 // Display native values..
-var colorPoints = map[int]color.RGBA{
-	red:    color.RGBA{R: 234, G: 50, B: 35},
-	green:  color.RGBA{R: 77, G: 169, B: 58},
-	blue:   color.RGBA{R: 0, G: 30, B: 245},
-	yellow: color.RGBA{R: 255, G: 253, B: 84},
-	orange: color.RGBA{R: 255, G: 165, B: 0},
-	purple: color.RGBA{R: 177, G: 25, B: 124},
-	black:  color.RGBA{R: 0, G: 0, B: 0},
-	white:  color.RGBA{R: 255, G: 255, B: 255},
-	brown:  color.RGBA{R: 98, G: 56, B: 16},
-	gray:   color.RGBA{R: 147, G: 149, B: 145},
-	pink:   color.RGBA{R: 239, G: 139, B: 189},
+var colorPoints = map[int][]color.RGBA{
+	red: {
+		color.RGBA{R: 234, G: 50, B: 35}, // red
+		// color.RGBA{R: 127, G: 23, B: 14}, // dark red
+		// color.RGBA{R: 96, G: 16, B: 33},  // maroon
+	},
+	green: {
+		color.RGBA{R: 77, G: 169, B: 58},   // green
+		color.RGBA{R: 166, G: 242, B: 139}, // light green
+		color.RGBA{R: 157, G: 246, B: 80},  // lime green
+		color.RGBA{R: 115, G: 246, B: 79},  // Bright Green
+		// color.RGBA{R: 27, G: 68, B: 22},    // Forest Green
+		color.RGBA{R: 206, G: 249, B: 188}, // Pale Green
+		color.RGBA{R: 106, G: 119, B: 36},  // Olive Green
+		color.RGBA{R: 119, G: 245, B: 169}, // Sea Green
+		color.RGBA{R: 183, G: 247, B: 94},  // Lime
+	},
+	blue: {
+		color.RGBA{R: 0, G: 30, B: 245},    // blue
+		color.RGBA{R: 156, G: 209, B: 248}, // light blue
+		color.RGBA{R: 63, G: 144, B: 134},  // teal
+		color.RGBA{R: 126, G: 189, B: 247}, // sky blue
+		color.RGBA{R: 86, G: 190, B: 173},  // Turquoise
+		color.RGBA{R: 1, G: 17, B: 87},     // dark blue
+		color.RGBA{R: 115, G: 251, B: 253}, // cyan
+		color.RGBA{R: 105, G: 229, B: 203}, // aqua
+		// color.RGBA{R: 1, G: 38, B: 163},    // Royal Blue
+		// color.RGBA{R: 3, G: 22, B: 67},     // Navy Blue
+		// color.RGBA{R: 52, G: 28, B: 125}, // Indigo
+	},
+	yellow: {
+		color.RGBA{R: 255, G: 253, B: 84}, // yellow
+		color.RGBA{R: 204, G: 176, B: 59}, // mustard
+		color.RGBA{R: 249, G: 215, B: 73}, // gold
+	},
+	orange: {
+		color.RGBA{R: 255, G: 165, B: 0},  // orange
+		color.RGBA{R: 240, G: 145, B: 53}, // dark orange
+	},
+	purple: {
+		color.RGBA{R: 177, G: 25, B: 124},  // purple
+		color.RGBA{R: 184, G: 131, B: 239}, // light purple
+		color.RGBA{R: 145, G: 65, B: 225},  // violet
+		color.RGBA{R: 195, G: 166, B: 234}, // Lavendar
+		color.RGBA{R: 50, G: 16, B: 60},    // dark purple
+		color.RGBA{R: 139, G: 139, B: 246}, // Periwinkle
+	},
+	black: {color.RGBA{R: 0, G: 0, B: 0}},
+	white: {color.RGBA{R: 255, G: 255, B: 255}},
+	brown: {
+		// color.RGBA{R: 98, G: 56, B: 16},    // brown
+		color.RGBA{R: 206, G: 177, B: 120}, // tan
+		color.RGBA{R: 229, G: 217, B: 172}, // Beige
+		color.RGBA{R: 169, G: 129, B: 87},  // light brown
+	},
+	gray: {
+		// color.RGBA{R: 147, G: 149, B: 145},
+		color.RGBA{R: 128, G: 128, B: 128}, // dark gray
+		color.RGBA{R: 211, G: 211, B: 211}, // light gray
+		color.RGBA{R: 169, G: 169, B: 169}, // gray
+	},
+	pink: {
+		color.RGBA{R: 239, G: 139, B: 189}, // pink
+		color.RGBA{R: 169, G: 117, B: 129}, // Mauve
+		color.RGBA{R: 239, G: 128, B: 113}, // salmon
+		color.RGBA{R: 234, G: 61, B: 138},  // hot pint
+		color.RGBA{R: 193, G: 78, B: 107},  // dark pink
+		color.RGBA{R: 248, G: 212, B: 223}, // light pink
+	},
 }
 
 var colorMap = make(map[int]map[color.Color]ColorStruct)
@@ -225,10 +282,12 @@ func getColorCategory(color color.RGBA) int {
 	var lowestCat = red
 	var shortestDistance = float64(-1)
 	for key, value := range colorPoints {
-		dist := getRgbDistance(value, color)
-		if shortestDistance == -1 || dist < shortestDistance {
-			lowestCat = key
-			shortestDistance = dist
+		for _, subColor := range value {
+			dist := getRgbDistance(subColor, color)
+			if shortestDistance == -1 || dist < shortestDistance {
+				lowestCat = key
+				shortestDistance = dist
+			}
 		}
 	}
 	return lowestCat
