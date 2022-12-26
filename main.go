@@ -9,10 +9,9 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"log"
+	"math"
 
-	"github.com/mattn/go-ciede2000"
-
-	// "math"
+	// "github.com/mattn/go-ciede2000"
 	"os"
 	"sort"
 )
@@ -215,13 +214,12 @@ func main() {
 			colorStruct := toColorStruct(colr)
 			value, present := findColorStruct(colr)
 			count := 1
+			colorStruct.rgba = color.RGBAModel.Convert(colr).(color.RGBA)
 			if present {
 				count = value.Count + 1
 				colorStruct.category = value.category
-				colorStruct.rgba = value.rgba
 			} else {
 				colorStruct.category = getColorCategory(colorStruct.rgba)
-				colorStruct.rgba = color.RGBAModel.Convert(colr).(color.RGBA)
 			}
 			colorStruct.Count = count
 			colorStruct.R = colorStruct.rgba.R
@@ -301,7 +299,7 @@ func getColorCategory(color color.RGBA) int {
 }
 
 func findColorStruct(colr color.Color) (*ColorStruct, bool) {
-	for i := 0; i < pink; i++ {
+	for i := 0; i <= pink; i++ {
 		colrStruct, present := colorMap[i][colr]
 		if present {
 			return &colrStruct, true
@@ -311,6 +309,6 @@ func findColorStruct(colr color.Color) (*ColorStruct, bool) {
 }
 
 func getRgbDistance(rgb1, rgb2 color.RGBA) float64 {
-	// return math.Sqrt(math.Pow(float64(rgb2.R)-float64(rgb1.R), 2) + math.Pow(float64(rgb2.G)-float64(rgb1.G), 2) + math.Pow(float64(rgb2.B)-float64(rgb1.B), 2))
-	return ciede2000.Diff(rgb1, rgb2)
+	return math.Sqrt(math.Pow(float64(rgb2.R)-float64(rgb1.R), 2) + math.Pow(float64(rgb2.G)-float64(rgb1.G), 2) + math.Pow(float64(rgb2.B)-float64(rgb1.B), 2))
+	// return ciede2000.Diff(rgb1, rgb2)
 }
