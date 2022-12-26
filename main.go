@@ -9,11 +9,12 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"log"
-	"math"
 
 	// "github.com/mattn/go-ciede2000"
 	"os"
 	"sort"
+
+	"math"
 )
 
 const numberOfColors = 20
