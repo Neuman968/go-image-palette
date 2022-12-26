@@ -9,10 +9,12 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"log"
-	"os"
-	"sort"
 
 	"github.com/mattn/go-ciede2000"
+
+	// "math"
+	"os"
+	"sort"
 )
 
 const numberOfColors = 20
@@ -204,16 +206,22 @@ func main() {
 	colorMap[pink] = make(map[color.Color]ColorStruct)
 
 	var largest ColorStruct
-
+	// start := time.Now()
+	// fmt.Println("Begining image processing...")
 	// Loop over image data.
 	for y := imgData.Bounds().Min.Y; y < imgData.Bounds().Max.Y; y++ {
 		for x := imgData.Bounds().Min.X; x < imgData.Bounds().Max.X; x++ {
 			colr := imgData.At(x, y)
 			colorStruct := toColorStruct(colr)
-			value, present := colorMap[colorStruct.category][colr]
+			value, present := findColorStruct(colr)
 			count := 1
 			if present {
 				count = value.Count + 1
+				colorStruct.category = value.category
+				colorStruct.rgba = value.rgba
+			} else {
+				colorStruct.category = getColorCategory(colorStruct.rgba)
+				colorStruct.rgba = color.RGBAModel.Convert(colr).(color.RGBA)
 			}
 			colorStruct.Count = count
 			colorStruct.R = colorStruct.rgba.R
@@ -227,7 +235,9 @@ func main() {
 			colorMap[colorStruct.category][colr] = colorStruct
 		}
 	}
-
+	// end := time.Since(start)
+	// fmt.Printf("Conversion took %s", end)
+	// fmt.Println(" Ending image processing.")
 	// fmt.Printf("There are %d entries in the map", len(colorMap))
 	result := &ResultColors{
 		Red:     getResultSlice(getSortedDict(red), numberOfColors),
@@ -247,10 +257,6 @@ func main() {
 	binary, err := json.Marshal(result)
 	fmt.Println(string(binary))
 }
-
-// func getSecondaryColor(largest: ColorStruct) {
-
-// }
 
 func getSortedDict(category int) []ColorStruct {
 	sortedColor := make([]ColorStruct, 0, len(colorMap[category]))
@@ -275,8 +281,7 @@ func toColorStruct(colorVal color.Color) ColorStruct {
 	colorStruct := new(ColorStruct)
 	colorStruct.color = colorVal
 	colorStruct.Count = 0
-	colorStruct.rgba = color.RGBAModel.Convert(colorVal).(color.RGBA)
-	colorStruct.category = getColorCategory(colorStruct.rgba)
+	// colorStruct.category = getColorCategory(colorStruct.rgba)
 	return *colorStruct
 }
 
@@ -293,6 +298,16 @@ func getColorCategory(color color.RGBA) int {
 		}
 	}
 	return lowestCat
+}
+
+func findColorStruct(colr color.Color) (*ColorStruct, bool) {
+	for i := 0; i < pink; i++ {
+		colrStruct, present := colorMap[i][colr]
+		if present {
+			return &colrStruct, true
+		}
+	}
+	return nil, false
 }
 
 func getRgbDistance(rgb1, rgb2 color.RGBA) float64 {
