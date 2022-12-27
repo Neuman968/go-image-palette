@@ -9,8 +9,6 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"log"
-
-	// "github.com/mattn/go-ciede2000"
 	"os"
 	"sort"
 
@@ -61,21 +59,6 @@ type TopColors struct {
 	gray   []ColorStruct
 	pink   []ColorStruct
 }
-
-// sRGB values.
-// var colorPoints = map[int]color.RGBA{
-// 	red:    color.RGBA{R: 254, G: 0, B: 0, A: 0},
-// 	green:  color.RGBA{R: 0, G: 128, B: 2},
-// 	blue:   color.RGBA{R: 19, G: 0, B: 255},
-// 	yellow: color.RGBA{R: 0, G: 254, B: 254},
-// 	orange: color.RGBA{R: 255, G: 165, B: 0},
-// 	purple: color.RGBA{R: 128, G: 0, B: 128},
-// 	black:  color.RGBA{R: 0, G: 0, B: 0},
-// 	white:  color.RGBA{R: 255, G: 255, B: 255},
-// 	brown:  color.RGBA{R: 165, G: 42, B: 42},
-// 	gray:   color.RGBA{R: 128, G: 128, B: 128},
-// 	pink:   color.RGBA{R: 0, G: 128, B: 2},
-// }
 
 // Display native values..
 var colorPoints = map[int][]color.RGBA{
@@ -300,8 +283,8 @@ func getColorCategory(color color.RGBA) int {
 }
 
 func findColorStruct(colr color.Color) (*ColorStruct, bool) {
-	for i := 0; i <= pink; i++ {
-		colrStruct, present := colorMap[i][colr]
+	for key := range colorMap {
+		colrStruct, present := colorMap[key][colr]
 		if present {
 			return &colrStruct, true
 		}
@@ -311,5 +294,4 @@ func findColorStruct(colr color.Color) (*ColorStruct, bool) {
 
 func getRgbDistance(rgb1, rgb2 color.RGBA) float64 {
 	return math.Sqrt(math.Pow(float64(rgb2.R)-float64(rgb1.R), 2) + math.Pow(float64(rgb2.G)-float64(rgb1.G), 2) + math.Pow(float64(rgb2.B)-float64(rgb1.B), 2))
-	// return ciede2000.Diff(rgb1, rgb2)
 }
