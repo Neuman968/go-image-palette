@@ -107,6 +107,7 @@ var colorPoints = map[int][]color.RGBA{
 		color.RGBA{R: 195, G: 166, B: 234}, // Lavendar
 		color.RGBA{R: 50, G: 16, B: 60},    // dark purple
 		color.RGBA{R: 139, G: 139, B: 246}, // Periwinkle
+		color.RGBA{R: 108, G: 97, B: 120},
 	},
 	black: {color.RGBA{R: 0, G: 0, B: 0}},
 	white: {color.RGBA{R: 255, G: 255, B: 255}},
@@ -203,7 +204,7 @@ func main() {
 				count = value.Count + 1
 				colorStruct.category = value.category
 			} else {
-				colorStruct.category = getColorCategory(colorStruct.rgba)
+				colorStruct.category = ColorCategory(colorStruct.rgba)
 			}
 			colorStruct.Count = count
 			colorStruct.R = colorStruct.rgba.R
@@ -267,7 +268,7 @@ func toColorStruct(colorVal color.Color) ColorStruct {
 	return *colorStruct
 }
 
-func getColorCategory(color color.RGBA) int {
+func ColorCategory(color color.RGBA) int {
 	var lowestCat = red
 	var shortestDistance = float64(-1)
 	for key, value := range colorPoints {
