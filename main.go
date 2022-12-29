@@ -15,8 +15,6 @@ import (
 	"math"
 )
 
-const numberOfColors = 20
-
 // Contains a reference to the RGBA image content as well as the number of times it occurs.
 //
 type ColorStruct struct {
@@ -87,6 +85,7 @@ var colorPoints = map[int][]color.RGBA{
 		color.RGBA{R: 1, G: 17, B: 87},     // dark blue
 		color.RGBA{R: 115, G: 251, B: 253}, // cyan
 		color.RGBA{R: 105, G: 229, B: 203}, // aqua
+		color.RGBA{R: 17, G: 20, B: 40},
 		// color.RGBA{R: 1, G: 38, B: 163},    // Royal Blue
 		// color.RGBA{R: 3, G: 22, B: 67},     // Navy Blue
 		// color.RGBA{R: 52, G: 28, B: 125}, // Indigo
@@ -99,6 +98,7 @@ var colorPoints = map[int][]color.RGBA{
 	orange: {
 		color.RGBA{R: 255, G: 165, B: 0},  // orange
 		color.RGBA{R: 240, G: 145, B: 53}, // dark orange
+		color.RGBA{R: 235, G: 172, B: 108},
 	},
 	purple: {
 		color.RGBA{R: 177, G: 25, B: 124},  // purple
@@ -108,6 +108,9 @@ var colorPoints = map[int][]color.RGBA{
 		color.RGBA{R: 50, G: 16, B: 60},    // dark purple
 		color.RGBA{R: 139, G: 139, B: 246}, // Periwinkle
 		color.RGBA{R: 108, G: 97, B: 120},
+		color.RGBA{R: 170, G: 150, B: 164},
+		color.RGBA{R: 122, G: 108, B: 131},
+		color.RGBA{R: 135, G: 119, B: 141},
 	},
 	black: {color.RGBA{R: 0, G: 0, B: 0}},
 	white: {color.RGBA{R: 255, G: 255, B: 255}},
@@ -165,7 +168,7 @@ func main() {
 	// fmt.Println("Hello World!")
 	// imgFile, err := os.Open("./red-f44242.png")
 	var imgFileName = flag.String("i", "", "-i <path-to-image>")
-
+	var numberOfColors = flag.Int("n", 10, "-n <number-of-colors>")
 	flag.Parse()
 
 	imgFile, err := os.Open(*imgFileName)
@@ -223,17 +226,17 @@ func main() {
 	// fmt.Println(" Ending image processing.")
 	// fmt.Printf("There are %d entries in the map", len(colorMap))
 	result := &ResultColors{
-		Red:     getResultSlice(getSortedDict(red), numberOfColors),
-		Green:   getResultSlice(getSortedDict(green), numberOfColors),
-		Blue:    getResultSlice(getSortedDict(blue), numberOfColors),
-		Yellow:  getResultSlice(getSortedDict(yellow), numberOfColors),
-		Orange:  getResultSlice(getSortedDict(orange), numberOfColors),
-		Purple:  getResultSlice(getSortedDict(purple), numberOfColors),
-		Black:   getResultSlice(getSortedDict(black), numberOfColors),
-		White:   getResultSlice(getSortedDict(white), numberOfColors),
-		Brown:   getResultSlice(getSortedDict(brown), numberOfColors),
-		Gray:    getResultSlice(getSortedDict(gray), numberOfColors),
-		Pink:    getResultSlice(getSortedDict(pink), numberOfColors),
+		Red:     getResultSlice(getSortedDict(red), *numberOfColors),
+		Green:   getResultSlice(getSortedDict(green), *numberOfColors),
+		Blue:    getResultSlice(getSortedDict(blue), *numberOfColors),
+		Yellow:  getResultSlice(getSortedDict(yellow), *numberOfColors),
+		Orange:  getResultSlice(getSortedDict(orange), *numberOfColors),
+		Purple:  getResultSlice(getSortedDict(purple), *numberOfColors),
+		Black:   getResultSlice(getSortedDict(black), *numberOfColors),
+		White:   getResultSlice(getSortedDict(white), *numberOfColors),
+		Brown:   getResultSlice(getSortedDict(brown), *numberOfColors),
+		Gray:    getResultSlice(getSortedDict(gray), *numberOfColors),
+		Pink:    getResultSlice(getSortedDict(pink), *numberOfColors),
 		Primary: largest,
 	}
 
