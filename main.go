@@ -75,6 +75,7 @@ var colorPoints = map[int][]color.RGBA{
 		color.RGBA{R: 106, G: 119, B: 36},  // Olive Green
 		color.RGBA{R: 119, G: 245, B: 169}, // Sea Green
 		color.RGBA{R: 183, G: 247, B: 94},  // Lime
+		color.RGBA{R: 64, G: 71, B: 47},
 	},
 	blue: {
 		color.RGBA{R: 0, G: 30, B: 245},    // blue
@@ -86,6 +87,9 @@ var colorPoints = map[int][]color.RGBA{
 		color.RGBA{R: 115, G: 251, B: 253}, // cyan
 		color.RGBA{R: 105, G: 229, B: 203}, // aqua
 		color.RGBA{R: 17, G: 20, B: 40},
+		color.RGBA{R: 75, G: 119, B: 209},
+		color.RGBA{R: 109, G: 147, B: 230},
+		color.RGBA{R: 161, G: 178, B: 214},
 		// color.RGBA{R: 1, G: 38, B: 163},    // Royal Blue
 		// color.RGBA{R: 3, G: 22, B: 67},     // Navy Blue
 		// color.RGBA{R: 52, G: 28, B: 125}, // Indigo
