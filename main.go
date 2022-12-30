@@ -28,34 +28,48 @@ type ColorStruct struct {
 	Count    int
 }
 
-type ResultColors struct {
-	Red       []ColorStruct
-	Green     []ColorStruct
-	Blue      []ColorStruct
-	Yellow    []ColorStruct
-	Orange    []ColorStruct
-	Purple    []ColorStruct
-	Black     []ColorStruct
-	White     []ColorStruct
-	Brown     []ColorStruct
-	Gray      []ColorStruct
-	Pink      []ColorStruct
-	Primary   ColorStruct
-	Secondary ColorStruct
+type ColorStructAndDist struct {
+	colorStruct ColorStruct
+	distance    float64
 }
 
-type TopColors struct {
-	red    []ColorStruct
-	green  []ColorStruct
-	blue   []ColorStruct
-	yellow []ColorStruct
-	orange []ColorStruct
-	purple []ColorStruct
-	black  []ColorStruct
-	white  []ColorStruct
-	brown  []ColorStruct
-	gray   []ColorStruct
-	pink   []ColorStruct
+type ResultColors struct {
+	Red    []ColorStruct
+	TopRed []ColorStruct
+
+	Green    []ColorStruct
+	TopGreen []ColorStruct
+
+	Blue    []ColorStruct
+	TopBlue []ColorStruct
+
+	Yellow    []ColorStruct
+	TopYellow []ColorStruct
+
+	Orange    []ColorStruct
+	TopOrange []ColorStruct
+
+	Purple    []ColorStruct
+	TopPurple []ColorStruct
+
+	Black    []ColorStruct
+	TopBlack []ColorStruct
+
+	White    []ColorStruct
+	TopWhite []ColorStruct
+
+	Brown    []ColorStruct
+	TopBrown []ColorStruct
+
+	Gray    []ColorStruct
+	TopGray []ColorStruct
+
+	Pink    []ColorStruct
+	TopPink []ColorStruct
+
+	Primary ColorStruct
+
+	Secondary ColorStruct
 }
 
 // Display native values..
@@ -142,17 +156,6 @@ var colorPoints = map[int][]color.RGBA{
 
 var colorMap = make(map[int]map[color.Color]ColorStruct)
 
-/*
-employeeSalary := map[string]int{
-"John": 1000
-"Sam": 2000
-}
-*/
-
-var complementColors = map[int]int{
-	red: blue,
-}
-
 // color categories as defined by me.
 const (
 	red    int = 0
@@ -173,6 +176,8 @@ func main() {
 	// imgFile, err := os.Open("./red-f44242.png")
 	var imgFileName = flag.String("i", "", "-i <path-to-image>")
 	var numberOfColors = flag.Int("n", 10, "-n <number-of-colors>")
+	var numberOfTopDistincts = flag.Int("d", 3, "-d <distinct-colors>")
+
 	flag.Parse()
 
 	imgFile, err := os.Open(*imgFileName)
@@ -244,8 +249,43 @@ func main() {
 		Primary: largest,
 	}
 
+	result.TopRed = getDistincts(result.Red, *numberOfTopDistincts)
+	result.TopGreen = getDistincts(result.Green, *numberOfTopDistincts)
+	result.TopBlue = getDistincts(result.Blue, *numberOfTopDistincts)
+	result.TopYellow = getDistincts(result.Yellow, *numberOfTopDistincts)
+	result.TopOrange = getDistincts(result.Orange, *numberOfTopDistincts)
+	result.TopPurple = getDistincts(result.Purple, *numberOfTopDistincts)
+	result.TopBlack = getDistincts(result.Black, *numberOfTopDistincts)
+	result.TopWhite = getDistincts(result.White, *numberOfTopDistincts)
+	result.TopBrown = getDistincts(result.Brown, *numberOfTopDistincts)
+	result.TopGray = getDistincts(result.Gray, *numberOfTopDistincts)
+	result.TopPink = getDistincts(result.Pink, *numberOfTopDistincts)
+
 	binary, err := json.Marshal(result)
 	fmt.Println(string(binary))
+}
+
+func getDistincts(colors []ColorStruct, numberOfDistcts int) []ColorStruct {
+	returnArr := make([]ColorStruct, numberOfDistcts)
+	cachedArr := make([]ColorStructAndDist, numberOfDistcts-1)
+	if len(colors) > 0 {
+		topColor := colors[0]
+		for i := 1; i < numberOfDistcts; i++ {
+			distance := getRgbDistance(topColor.rgba, colors[i].rgba)
+			cachedArr[i-1] = ColorStructAndDist{
+				distance:    distance,
+				colorStruct: colors[i],
+			}
+		}
+		sort.Slice(cachedArr, func(i, j int) bool {
+			return cachedArr[i].distance > cachedArr[j].distance
+		})
+		returnArr[0] = topColor
+		for index, value := range cachedArr {
+			returnArr[index+1] = value.colorStruct
+		}
+	}
+	return returnArr
 }
 
 func getSortedDict(category int) []ColorStruct {
