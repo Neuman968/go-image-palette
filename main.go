@@ -9,10 +9,9 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"log"
+	"math"
 	"os"
 	"sort"
-
-	"math"
 )
 
 // Contains a reference to the RGBA image content as well as the number of times it occurs.
@@ -34,38 +33,38 @@ type ColorStructAndDist struct {
 }
 
 type ResultColors struct {
-	Red    []ColorStruct
-	TopRed []ColorStruct
+	Red            []ColorStruct
+	TopDistinctRed []ColorStruct
 
-	Green    []ColorStruct
-	TopGreen []ColorStruct
+	Green            []ColorStruct
+	TopDistinctGreen []ColorStruct
 
-	Blue    []ColorStruct
-	TopBlue []ColorStruct
+	Blue            []ColorStruct
+	TopDistinctBlue []ColorStruct
 
-	Yellow    []ColorStruct
-	TopYellow []ColorStruct
+	Yellow            []ColorStruct
+	TopDistinctYellow []ColorStruct
 
-	Orange    []ColorStruct
-	TopOrange []ColorStruct
+	Orange            []ColorStruct
+	TopDistinctOrange []ColorStruct
 
-	Purple    []ColorStruct
-	TopPurple []ColorStruct
+	Purple            []ColorStruct
+	TopDistinctPurple []ColorStruct
 
-	Black    []ColorStruct
-	TopBlack []ColorStruct
+	Black            []ColorStruct
+	TopDistinctBlack []ColorStruct
 
-	White    []ColorStruct
-	TopWhite []ColorStruct
+	White            []ColorStruct
+	TopDistinctWhite []ColorStruct
 
-	Brown    []ColorStruct
-	TopBrown []ColorStruct
+	Brown            []ColorStruct
+	TopDistinctBrown []ColorStruct
 
-	Gray    []ColorStruct
-	TopGray []ColorStruct
+	Gray            []ColorStruct
+	TopDistinctGray []ColorStruct
 
-	Pink    []ColorStruct
-	TopPink []ColorStruct
+	Pink            []ColorStruct
+	TopDistinctPink []ColorStruct
 
 	Primary ColorStruct
 
@@ -249,28 +248,29 @@ func main() {
 		Primary: largest,
 	}
 
-	result.TopRed = getDistincts(result.Red, *numberOfTopDistincts)
-	result.TopGreen = getDistincts(result.Green, *numberOfTopDistincts)
-	result.TopBlue = getDistincts(result.Blue, *numberOfTopDistincts)
-	result.TopYellow = getDistincts(result.Yellow, *numberOfTopDistincts)
-	result.TopOrange = getDistincts(result.Orange, *numberOfTopDistincts)
-	result.TopPurple = getDistincts(result.Purple, *numberOfTopDistincts)
-	result.TopBlack = getDistincts(result.Black, *numberOfTopDistincts)
-	result.TopWhite = getDistincts(result.White, *numberOfTopDistincts)
-	result.TopBrown = getDistincts(result.Brown, *numberOfTopDistincts)
-	result.TopGray = getDistincts(result.Gray, *numberOfTopDistincts)
-	result.TopPink = getDistincts(result.Pink, *numberOfTopDistincts)
+	result.TopDistinctRed = getDistincts(result.Red, *numberOfTopDistincts)
+	result.TopDistinctGreen = getDistincts(result.Green, *numberOfTopDistincts)
+	result.TopDistinctBlue = getDistincts(result.Blue, *numberOfTopDistincts)
+	result.TopDistinctYellow = getDistincts(result.Yellow, *numberOfTopDistincts)
+	result.TopDistinctOrange = getDistincts(result.Orange, *numberOfTopDistincts)
+	result.TopDistinctPurple = getDistincts(result.Purple, *numberOfTopDistincts)
+	result.TopDistinctBlack = getDistincts(result.Black, *numberOfTopDistincts)
+	result.TopDistinctWhite = getDistincts(result.White, *numberOfTopDistincts)
+	result.TopDistinctBrown = getDistincts(result.Brown, *numberOfTopDistincts)
+	result.TopDistinctGray = getDistincts(result.Gray, *numberOfTopDistincts)
+	result.TopDistinctPink = getDistincts(result.Pink, *numberOfTopDistincts)
 
 	binary, err := json.Marshal(result)
 	fmt.Println(string(binary))
 }
 
 func getDistincts(colors []ColorStruct, numberOfDistcts int) []ColorStruct {
+	// fmt.Printf("Analyzing %d colors", len(colors))
 	returnArr := make([]ColorStruct, numberOfDistcts)
-	cachedArr := make([]ColorStructAndDist, numberOfDistcts-1)
+	cachedArr := make([]ColorStructAndDist, len(colors))
 	if len(colors) > 0 {
 		topColor := colors[0]
-		for i := 1; i < numberOfDistcts; i++ {
+		for i := 1; i < len(colors); i++ {
 			distance := getRgbDistance(topColor.rgba, colors[i].rgba)
 			cachedArr[i-1] = ColorStructAndDist{
 				distance:    distance,
@@ -281,8 +281,10 @@ func getDistincts(colors []ColorStruct, numberOfDistcts int) []ColorStruct {
 			return cachedArr[i].distance > cachedArr[j].distance
 		})
 		returnArr[0] = topColor
-		for index, value := range cachedArr {
-			returnArr[index+1] = value.colorStruct
+		for i := 1; i < numberOfDistcts-1; i++ {
+			returnArr[i] = cachedArr[i].colorStruct
+			// fmt.Println("Printing returned color struct... ")
+			// fmt.Printf("RGB %d %d %d Distance %f", cachedArr[i].colorStruct.rgba.R, cachedArr[i].colorStruct.rgba.G, cachedArr[i].colorStruct.rgba.B, cachedArr[i].distance)
 		}
 	}
 	return returnArr
