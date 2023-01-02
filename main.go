@@ -248,6 +248,11 @@ func main() {
 		Primary: largest,
 	}
 
+	result.Secondary = getSecondary([][]ColorStruct{
+		result.Red, result.Green, result.Blue, result.Yellow,
+		result.Orange, result.Purple, result.Pink,
+	}, largest.category)
+
 	result.TopDistinctRed = getDistincts(result.Red, *numberOfTopDistincts)
 	result.TopDistinctGreen = getDistincts(result.Green, *numberOfTopDistincts)
 	result.TopDistinctBlue = getDistincts(result.Blue, *numberOfTopDistincts)
@@ -281,13 +286,26 @@ func getDistincts(colors []ColorStruct, numberOfDistcts int) []ColorStruct {
 			return cachedArr[i].distance > cachedArr[j].distance
 		})
 		returnArr[0] = topColor
-		for i := 1; i < numberOfDistcts-1; i++ {
+		for i := 1; i < numberOfDistcts; i++ {
 			returnArr[i] = cachedArr[i].colorStruct
 			// fmt.Println("Printing returned color struct... ")
 			// fmt.Printf("RGB %d %d %d Distance %f", cachedArr[i].colorStruct.rgba.R, cachedArr[i].colorStruct.rgba.G, cachedArr[i].colorStruct.rgba.B, cachedArr[i].distance)
 		}
 	}
 	return returnArr
+}
+
+func getSecondary(colors [][]ColorStruct, category int) ColorStruct {
+	var secondary ColorStruct
+	for _, colorArr := range colors {
+		if len(colorArr) > 0 {
+			if (ColorStruct{} == secondary ||
+				(colorArr[0].category != category && colorArr[0].Count > secondary.Count)) {
+				secondary = colorArr[0]
+			}
+		}
+	}
+	return secondary
 }
 
 func getSortedDict(category int) []ColorStruct {
