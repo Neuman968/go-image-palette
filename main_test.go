@@ -37,3 +37,12 @@ func Test_testRGBDistance_Expecting3dPointDistance(t *testing.T) {
 		t.Errorf("Distance was not correct, was %s %s", resultStr, expectStr)
 	}
 }
+
+func Test_testRgbLightness_passingRgbValue_expectingLightValue(t *testing.T) {
+	result := getLightness(color.RGBA{R: 255, G: 255, B: 255})
+	expected := fmt.Sprint(1)
+	actual := fmt.Sprint(result)
+	if actual != expected {
+		t.Errorf("Lightness was not correct expected: %s actual %s", expected, actual)
+	}
+}

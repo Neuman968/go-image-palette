@@ -269,6 +269,25 @@ func main() {
 	fmt.Println(string(binary))
 }
 
+/*
+M = max{R, G, B}
+m = min{R, G, B}
+d = (M - m)/255.
+
+The lightness, L, of a color is given by the equation
+
+L = [½(M + m)]/255 = (M + m)/510.
+
+https://www.had2know.org/technology/hsl-rgb-color-converter.html
+© 2010-2023 had2know.org
+*/
+
+func getLightness(rgba color.RGBA) float64 {
+	max := math.Max(float64(rgba.R), math.Max(float64(rgba.G), float64(rgba.B)))
+	min := math.Min(float64(rgba.R), math.Min(float64(rgba.G), float64(rgba.B)))
+	return (0.5 * (max + min)) / 255
+}
+
 func getDistincts(colors []ColorStruct, numberOfDistcts int) []ColorStruct {
 	// fmt.Printf("Analyzing %d colors", len(colors))
 	returnArr := make([]ColorStruct, numberOfDistcts)
