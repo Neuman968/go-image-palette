@@ -319,11 +319,12 @@ func getSecondary(colors [][]ColorStruct, category int) ColorStruct {
 	for _, colorArr := range colors {
 		if len(colorArr) > 0 {
 			if (ColorStruct{} == secondary ||
-				(colorArr[0].category != category && colorArr[0].Count > secondary.Count)) {
+				(colorArr[0].category != category && colorArr[0].Count > secondary.Count && getLightness(secondary.rgba) > 60)) {
 				secondary = colorArr[0]
 			}
 		}
 	}
+
 	return secondary
 }
 
