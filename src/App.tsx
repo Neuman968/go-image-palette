@@ -22,7 +22,7 @@ function ButtonAppBar({ primary, secondary }: { primary: string, secondary: stri
       <AppBar
         position="static"
         sx={{
-          'background-image': `linear-gradient(144deg,${primary}, ${secondary} 50%)`
+          backgroundImage: `linear-gradient(144deg,${primary}, ${secondary} 50%)`
         }}
       >
         <Toolbar>
