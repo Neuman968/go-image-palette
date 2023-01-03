@@ -14,6 +14,8 @@ import (
 	"sort"
 )
 
+const LIGHT_THRESHOLD = .40
+
 // Contains a reference to the RGBA image content as well as the number of times it occurs.
 //
 type ColorStruct struct {
@@ -222,7 +224,7 @@ func main() {
 			colorStruct.G = colorStruct.rgba.G
 			colorStruct.B = colorStruct.rgba.B
 			colorStruct.A = colorStruct.rgba.A
-			if (ColorStruct{} == largest || largest.Count < count) {
+			if (ColorStruct{} == largest || (largest.Count < count && getLightness(colorStruct.rgba) > LIGHT_THRESHOLD)) {
 				largest = colorStruct
 			}
 
@@ -319,7 +321,7 @@ func getSecondary(colors [][]ColorStruct, category int) ColorStruct {
 	for _, colorArr := range colors {
 		if len(colorArr) > 0 {
 			if (ColorStruct{} == secondary ||
-				(colorArr[0].category != category && colorArr[0].Count > secondary.Count && getLightness(secondary.rgba) > 60)) {
+				(colorArr[0].category != category && colorArr[0].Count > secondary.Count && getLightness(secondary.rgba) > LIGHT_THRESHOLD)) {
 				secondary = colorArr[0]
 			}
 		}
