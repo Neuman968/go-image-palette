@@ -24,6 +24,7 @@ export type ImagePalette = {
     TopDistinctPink: Array<RGBAResult>,
 
     Primary: RGBAResult,
+    Secondary: RGBAResult,
 }
 
 export type RGBAResult = {

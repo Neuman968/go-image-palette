@@ -5,7 +5,7 @@ import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Container } from '@mui/system';
-import { ColorResult, SwatchesPicker } from 'react-color';
+import { CirclePicker, ColorResult, SwatchesPicker } from 'react-color';
 import axios from 'axios';
 import { ImagePalette, RGBAResult } from './types/ImagePalette';
 import { Grid } from '@mui/material';
@@ -16,10 +16,15 @@ import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
-function ButtonAppBar() {
+function ButtonAppBar({ primary, secondary }: { primary: string, secondary: string }) {
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
+      <AppBar
+        position="static"
+        sx={{
+          'background-image': `linear-gradient(144deg,${primary}, ${secondary} 50%)`
+        }}
+      >
         <Toolbar>
           <IconButton
             size="large"
@@ -70,6 +75,10 @@ function rgbToHex(r: number, g: number, b: number): string {
   return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
+function rgbResultToHex(clrResult: RGBAResult): string {
+  return rgbToHex(clrResult.R, clrResult.G, clrResult.B)
+}
+
 function Swatch(props: SwatchProp) {
   return <Grid item>
     <SwatchesPicker colors={[props.rgbas]} />
@@ -101,7 +110,6 @@ function TopDistinctSwatches({ imagePalette, onClick }: { imagePalette: ImagePal
       toSwatchFormat(imagePalette.TopDistinctBrown),
       toSwatchFormat(imagePalette.TopDistinctGray),
       toSwatchFormat(imagePalette.TopDistinctBlack),
-      toSwatchFormat(imagePalette.TopDistinctWhite),
     ]} />
 }
 
@@ -127,7 +135,7 @@ function App() {
     axios.get<ImagePalette>('http://localhost:8000/colors.json')
       .then((resp) => {
         setPalette(resp.data)
-        setRgbCache(newCacheFromResult([
+        const cacheMap = newCacheFromResult([
           resp.data.TopDistinctRed,
           resp.data.TopDistinctGreen,
           resp.data.TopDistinctBlue,
@@ -139,7 +147,11 @@ function App() {
           resp.data.TopDistinctGray,
           resp.data.TopDistinctBlack,
           resp.data.TopDistinctWhite,
-        ]))
+        ])
+        setRgbCache(cacheMap)
+        console.log('Primary ', resp.data.Primary)
+        console.log('Secondary ', resp.data.Secondary)
+
       })
     return () => { }
   }, [])
@@ -150,15 +162,29 @@ function App() {
 
   return (
     <React.Fragment>
-      <ButtonAppBar />
+      {
+        palette &&
+        <ButtonAppBar
+          secondary={rgbToHex(palette.Secondary.R, palette.Secondary.G, palette.Secondary.B)}
+          primary={rgbToHex(palette.Primary.R, palette.Primary.G, palette.Primary.B)}
+        />
+      }
       <Container>
-
-        <Card sx={{ marginTop: 5 }}>
+        {palette &&
+          <CirclePicker 
+          onChange={handleColorClick}
+          colors={[rgbResultToHex(palette.Primary), rgbResultToHex(palette.Secondary)]} />
+        }
+        <Card sx={{
+          marginTop: 5,
+          // 'background': 'linear-gradient(to left, #f7ba2b 0%, #ea5358 100%)',
+          // 'box-shadow': 'rgba(151, 65, 252, 0.2) 0 15px 30px -5px',
+        }}>
           <CardMedia
-            sx={{
-              height: 300,
-            }}
-            image="http://localhost:8000/BEACH.jpg"
+            // sx={{
+            //   height: 800,
+            // }}
+            image="http://localhost:8000/IMG_5467.jpg"
             component="img"
             title=""
           />
