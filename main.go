@@ -71,6 +71,12 @@ type ResultColors struct {
 	Primary ColorStruct
 
 	Secondary ColorStruct
+
+	Tertiary ColorStruct
+
+	Fourth ColorStruct
+
+	Fifth ColorStruct
 }
 
 // Display native values..
@@ -253,7 +259,22 @@ func main() {
 	result.Secondary = getSecondary([][]ColorStruct{
 		result.Red, result.Green, result.Blue, result.Yellow,
 		result.Orange, result.Purple, result.Pink,
-	}, largest.category)
+	}, map[int]struct{}{largest.category: {}})
+
+	result.Tertiary = getSecondary([][]ColorStruct{
+		result.Red, result.Green, result.Blue, result.Yellow,
+		result.Orange, result.Purple, result.Pink,
+	}, map[int]struct{}{largest.category: {}, result.Secondary.category: {}})
+
+	result.Fourth = getSecondary([][]ColorStruct{
+		result.Red, result.Green, result.Blue, result.Yellow,
+		result.Orange, result.Purple, result.Pink,
+	}, map[int]struct{}{largest.category: {}, result.Secondary.category: {}, result.Tertiary.category: {}})
+
+	result.Fifth = getSecondary([][]ColorStruct{
+		result.Red, result.Green, result.Blue, result.Yellow,
+		result.Orange, result.Purple, result.Pink,
+	}, map[int]struct{}{largest.category: {}, result.Secondary.category: {}, result.Tertiary.category: {}, result.Fourth.category: {}})
 
 	result.TopDistinctRed = getDistincts(result.Red, *numberOfTopDistincts)
 	result.TopDistinctGreen = getDistincts(result.Green, *numberOfTopDistincts)
@@ -316,12 +337,13 @@ func getDistincts(colors []ColorStruct, numberOfDistcts int) []ColorStruct {
 	return returnArr
 }
 
-func getSecondary(colors [][]ColorStruct, category int) ColorStruct {
+func getSecondary(colors [][]ColorStruct, excludeCategories map[int]struct{}) ColorStruct {
 	var secondary ColorStruct
 	for _, colorArr := range colors {
 		if len(colorArr) > 0 {
+			_, isCategory := excludeCategories[colorArr[0].category]
 			if (ColorStruct{} == secondary ||
-				(colorArr[0].category != category && colorArr[0].Count > secondary.Count && getLightness(secondary.rgba) > LIGHT_THRESHOLD)) {
+				(!isCategory && colorArr[0].Count > secondary.Count && getLightness(secondary.rgba) > LIGHT_THRESHOLD)) {
 				secondary = colorArr[0]
 			}
 		}
