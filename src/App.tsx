@@ -16,13 +16,13 @@ import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
-function ButtonAppBar({ primary, secondary }: { primary: string, secondary: string }) {
+function ButtonAppBar({ primary, secondary, tertiary }: { primary: string, secondary: string, tertiary: string }) {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar
         position="static"
         sx={{
-          backgroundImage: `linear-gradient(144deg,${primary}, ${secondary} 50%)`
+          backgroundImage: `linear-gradient(144deg,${primary}, ${secondary} 50%, ${tertiary})`
         }}
       >
         <Toolbar>
@@ -167,13 +167,29 @@ function App() {
         <ButtonAppBar
           secondary={rgbToHex(palette.Secondary.R, palette.Secondary.G, palette.Secondary.B)}
           primary={rgbToHex(palette.Primary.R, palette.Primary.G, palette.Primary.B)}
+          tertiary={rgbToHex(palette.Tertiary.R, palette.Tertiary.G, palette.Tertiary.B)}
         />
       }
       <Container>
         {palette &&
-          <CirclePicker 
-          onChange={handleColorClick}
-          colors={[rgbResultToHex(palette.Primary), rgbResultToHex(palette.Secondary)]} />
+          <CirclePicker
+            onChange={handleColorClick}
+            circleSize={60}
+            styles={{
+              default: {
+                card: {
+                  width: '100%',
+                  margin: '32px',
+                }
+              }
+            }}
+            colors={[
+              rgbResultToHex(palette.Primary),
+              rgbResultToHex(palette.Secondary),
+              rgbResultToHex(palette.Tertiary),
+              rgbResultToHex(palette.Fourth),
+              rgbResultToHex(palette.Fifth),
+            ]} />
         }
         <Card sx={{
           marginTop: 5,
