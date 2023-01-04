@@ -111,9 +111,6 @@ var colorPoints = map[int][]color.RGBA{
 		color.RGBA{R: 75, G: 119, B: 209},
 		color.RGBA{R: 109, G: 147, B: 230},
 		color.RGBA{R: 161, G: 178, B: 214},
-		// color.RGBA{R: 1, G: 38, B: 163},    // Royal Blue
-		// color.RGBA{R: 3, G: 22, B: 67},     // Navy Blue
-		// color.RGBA{R: 52, G: 28, B: 125}, // Indigo
 	},
 	yellow: {
 		color.RGBA{R: 255, G: 253, B: 84}, // yellow
@@ -256,22 +253,22 @@ func main() {
 		Primary: largest,
 	}
 
-	result.Secondary = getSecondary([][]ColorStruct{
+	result.Secondary = getAccent([][]ColorStruct{
 		result.Red, result.Green, result.Blue, result.Yellow,
 		result.Orange, result.Purple, result.Pink,
 	}, map[int]struct{}{largest.category: {}})
 
-	result.Tertiary = getSecondary([][]ColorStruct{
+	result.Tertiary = getAccent([][]ColorStruct{
 		result.Red, result.Green, result.Blue, result.Yellow,
 		result.Orange, result.Purple, result.Pink,
 	}, map[int]struct{}{largest.category: {}, result.Secondary.category: {}})
 
-	result.Fourth = getSecondary([][]ColorStruct{
+	result.Fourth = getAccent([][]ColorStruct{
 		result.Red, result.Green, result.Blue, result.Yellow,
 		result.Orange, result.Purple, result.Pink,
 	}, map[int]struct{}{largest.category: {}, result.Secondary.category: {}, result.Tertiary.category: {}})
 
-	result.Fifth = getSecondary([][]ColorStruct{
+	result.Fifth = getAccent([][]ColorStruct{
 		result.Red, result.Green, result.Blue, result.Yellow,
 		result.Orange, result.Purple, result.Pink,
 	}, map[int]struct{}{largest.category: {}, result.Secondary.category: {}, result.Tertiary.category: {}, result.Fourth.category: {}})
@@ -337,7 +334,7 @@ func getDistincts(colors []ColorStruct, numberOfDistcts int) []ColorStruct {
 	return returnArr
 }
 
-func getSecondary(colors [][]ColorStruct, excludeCategories map[int]struct{}) ColorStruct {
+func getAccent(colors [][]ColorStruct, excludeCategories map[int]struct{}) ColorStruct {
 	var secondary ColorStruct
 	for _, colorArr := range colors {
 		if len(colorArr) > 0 {
@@ -375,7 +372,6 @@ func toColorStruct(colorVal color.Color) ColorStruct {
 	colorStruct := new(ColorStruct)
 	colorStruct.color = colorVal
 	colorStruct.Count = 0
-	// colorStruct.category = getColorCategory(colorStruct.rgba)
 	return *colorStruct
 }
 
