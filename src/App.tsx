@@ -15,14 +15,15 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 
-function ButtonAppBar({ primary, secondary, tertiary }: { primary: string, secondary: string, tertiary: string }) {
+function ButtonAppBar({ primary, secondary, tertiary, fourth, fifth }: { primary: string, secondary: string, tertiary: string, fourth: string, fifth: string }) {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar
         position="static"
         sx={{
-          backgroundImage: `linear-gradient(144deg,${primary}, ${secondary} 50%, ${tertiary})`
+          backgroundImage: `linear-gradient(144deg,${primary}, ${secondary}, ${tertiary}, ${fourth}, ${fifth})`
         }}
       >
         <Toolbar>
@@ -45,22 +46,6 @@ function toSwatchFormat(arr: Array<RGBAResult>): Array<string> {
   return arr.map((color: RGBAResult) => `rgb(${color.R}, ${color.G}, ${color.B})`)
 }
 
-function toColorMap(palette: ImagePalette): Record<string, Array<string>> {
-  return {
-    'Red': toSwatchFormat(palette.TopDistinctRed),
-    'Green': toSwatchFormat(palette.TopDistinctGreen),
-    'Blue': toSwatchFormat(palette.TopDistinctBlue),
-    'Yellow': toSwatchFormat(palette.TopDistinctYellow),
-    'Orange': toSwatchFormat(palette.TopDistinctOrange),
-    'Purple': toSwatchFormat(palette.TopDistinctPurple),
-    'Black': toSwatchFormat(palette.TopDistinctBlack),
-    'White': toSwatchFormat(palette.TopDistinctWhite),
-    'Brown': toSwatchFormat(palette.TopDistinctBrown),
-    'Gray': toSwatchFormat(palette.TopDistinctGray),
-    'Pink': toSwatchFormat(palette.TopDistinctPink),
-  }
-}
-
 type SwatchProp = {
   color: string,
   rgbas: Array<string>,
@@ -77,13 +62,6 @@ function rgbToHex(r: number, g: number, b: number): string {
 
 function rgbResultToHex(clrResult: RGBAResult): string {
   return rgbToHex(clrResult.R, clrResult.G, clrResult.B)
-}
-
-function Swatch(props: SwatchProp) {
-  return <Grid item>
-    <SwatchesPicker colors={[props.rgbas]} />
-    <Typography>{props.color}</Typography>
-  </Grid>
 }
 
 function TopDistinctSwatches({ imagePalette, onClick }: { imagePalette: ImagePalette, onClick: (clr: ColorResult, ev: React.ChangeEvent) => void }) {
@@ -157,10 +135,25 @@ function App() {
   }, [])
 
   const handleColorClick = (clr: ColorResult, ev: React.ChangeEvent) => {
-    console.log('Color Click Event... ', clr, rgbCache?.get(clr.hex))
+    console.log('Color Click Event... ', clr, rgbCache?.get(clr.hex), ev)
   }
 
+  const theme = React.useMemo(() => createTheme(
+    palette ? {
+      palette: {
+        primary: {
+          main: rgbResultToHex(palette?.Primary),
+        },
+        secondary: {
+          main: rgbResultToHex(palette?.Secondary),
+        }
+      },
+    } : {}
+  ), [ palette ])
+
+
   return (
+    <ThemeProvider theme={theme}>
     <React.Fragment>
       {
         palette &&
@@ -168,44 +161,49 @@ function App() {
           secondary={rgbToHex(palette.Secondary.R, palette.Secondary.G, palette.Secondary.B)}
           primary={rgbToHex(palette.Primary.R, palette.Primary.G, palette.Primary.B)}
           tertiary={rgbToHex(palette.Tertiary.R, palette.Tertiary.G, palette.Tertiary.B)}
+          fourth={rgbResultToHex(palette.Fourth)}
+          fifth={rgbResultToHex(palette.Fifth)}
         />
       }
-      <Container>
-        {palette &&
-          <CirclePicker
-            onChange={handleColorClick}
-            circleSize={60}
-            styles={{
-              default: {
-                card: {
-                  width: '100%',
-                  margin: '32px',
-                }
-              }
-            }}
-            colors={[
-              rgbResultToHex(palette.Primary),
-              rgbResultToHex(palette.Secondary),
-              rgbResultToHex(palette.Tertiary),
-              rgbResultToHex(palette.Fourth),
-              rgbResultToHex(palette.Fifth),
-            ]} />
-        }
+      <Container sx={{ overflowX: 'hidden' }}>
         <Card sx={{
           marginTop: 5,
           // 'background': 'linear-gradient(to left, #f7ba2b 0%, #ea5358 100%)',
           // 'box-shadow': 'rgba(151, 65, 252, 0.2) 0 15px 30px -5px',
         }}>
           <CardMedia
-            // sx={{
-            //   height: 800,
-            // }}
+            sx={{
+              height: 400,
+              objectFit: 'contain',
+            }}
             image="http://localhost:8000/IMG_5467.jpg"
             component="img"
             title=""
           />
           <CardContent>
+            {palette &&
+              <CirclePicker
+                onChange={handleColorClick}
+                circleSize={60}
+                styles={{
+                  default: {
+                    card: {
+                      justifyContent: 'center',
+                      width: '100%',
+                      margin: '32px',
+                    }
+                  }
+                }}
+                colors={[
+                  rgbResultToHex(palette.Primary),
+                  rgbResultToHex(palette.Secondary),
+                  rgbResultToHex(palette.Tertiary),
+                  rgbResultToHex(palette.Fourth),
+                  rgbResultToHex(palette.Fifth),
+                ]} />
+            }
             <Box display="flex" justifyContent="center">
+
               {palette && <TopDistinctSwatches
                 imagePalette={palette}
                 onClick={handleColorClick}
@@ -214,12 +212,13 @@ function App() {
 
           </CardContent>
           <CardActions>
-            <Button size="small">Share</Button>
-            <Button size="small">Upload Another</Button>
+            <Button variant="contained" size="small">Share</Button>
+            <Button variant="contained" size="small">Upload Another</Button>
           </CardActions>
         </Card>
       </Container>
     </React.Fragment>
+    </ThemeProvider>
   );
 }
 
