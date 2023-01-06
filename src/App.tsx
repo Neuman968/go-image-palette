@@ -14,7 +14,6 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import PaletteCard from './components/PaletteCard';
 
@@ -68,20 +67,26 @@ function TopDistinctSwatches({ imagePalette, onClick }: { imagePalette: ImagePal
         picker: {
           display: 'flex',
           justifyContent: 'center',
-          boxShadow: 'unset',
         },
-        body: {
-          // color:
-          boxShadow: 'unset',
-        },
-        clear: {
-          boxShadow: 'unset',
-        }
       }
     }}
     onChange={(clr: ColorResult, ev: React.ChangeEvent) => {
       setSelected(clr)
       onClick(clr, ev)
+    }}
+    onSwatchHover={(color: ColorResult, event: MouseEvent) => {
+      // console.log(event.target)
+      if (event.target instanceof HTMLElement) {
+        // event.target.style.transform = 'translateY(-3%)'
+        // event.target.style.boxShadow = `20px 20px 10px grey !important;`
+        event.target.classList.add('selected-swatch')
+        event.target.onmouseleave = (ev) => {
+          if (ev.target instanceof HTMLElement) {
+            // ev.target.style.transform = 'unset'
+            ev.target.classList.remove('selected-swatch')
+          }
+        }
+      }
     }}
     height={450}
     width={520}
@@ -117,6 +122,23 @@ function App() {
   const [palette, setPalette] = React.useState<ImagePalette | undefined>()
 
   const [rgbCache, setRgbCache] = React.useState<Map<string, RGBAResult>>()
+
+  React.useEffect(() => {
+    return () => {
+      const elem = document.getElementsByClassName('swatches-picker')
+      const [first] = elem
+      if (first && first instanceof HTMLElement) {
+        const firstChild = first.childNodes[0]
+        if (firstChild && firstChild instanceof HTMLElement) {
+          const second = firstChild.firstElementChild
+          if (second && second instanceof HTMLElement) {
+            second.classList.add('no-box')
+          }
+        }
+      }
+    }
+
+  }, [])
 
   React.useEffect(() => {
     axios.get<ImagePalette>('http://localhost:8000/colors.json')
@@ -207,7 +229,7 @@ function App() {
               component="img"
               title=""
             />
-            <CardContent sx={{ padding: '0px'}}>
+            <CardContent sx={{ padding: '0px' }}>
               {palette && <TopDistinctSwatches
                 imagePalette={palette}
                 onClick={handleColorClick}
