@@ -25,6 +25,9 @@ export type ImagePalette = {
 
     Primary: RGBAResult,
     Secondary: RGBAResult,
+    Tertiary: RGBAResult,
+    Fourth: RGBAResult,
+    Fifth: RGBAResult,
 }
 
 export type RGBAResult = {
