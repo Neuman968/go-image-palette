@@ -8,7 +8,7 @@ import { Container } from '@mui/system';
 import { CirclePicker, ColorResult, RGBColor, SwatchesPicker } from 'react-color';
 import axios from 'axios';
 import { ImagePalette, RGBAResult } from './types/ImagePalette';
-import { Grid } from '@mui/material';
+import { Grid, Palette } from '@mui/material';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
@@ -16,6 +16,7 @@ import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import PaletteCard from './components/PaletteCard';
+import { PaletteState } from './types/Palette';
 
 function ButtonAppBar({ primary, secondary, tertiary, fourth, fifth }: { primary: string, secondary: string, tertiary: string, fourth: string, fifth: string }) {
   return (
@@ -119,10 +120,15 @@ const newCacheFromResult = (arr: Array<Array<RGBAResult>>): Map<string, RGBAResu
 
 function App() {
 
-  const [palette, setPalette] = React.useState<ImagePalette | undefined>()
+  const [imagePalette, setImagePalette] = React.useState<ImagePalette | undefined>()
+
+  const [palette, setPalette] = React.useState<PaletteState | undefined>()
+
+  const [selectedColor, setSelectedColor] = React.useState<keyof PaletteState | undefined>()
 
   const [rgbCache, setRgbCache] = React.useState<Map<string, RGBAResult>>()
 
+  // hack in order to remove the box shadow from swatches-picker lol.
   React.useEffect(() => {
     return () => {
       const elem = document.getElementsByClassName('swatches-picker')
@@ -143,7 +149,14 @@ function App() {
   React.useEffect(() => {
     axios.get<ImagePalette>('http://localhost:8000/colors.json')
       .then((resp) => {
-        setPalette(resp.data)
+        setImagePalette(resp.data)
+        setPalette({ 
+          Primary: resp.data.Primary,
+          Secondary: resp.data.Secondary,
+          Tertiary: resp.data.Tertiary,
+          Fourth: resp.data.Fourth,
+          Fifth: resp.data.Fifth,
+         })
         const cacheMap = newCacheFromResult([
           resp.data.TopDistinctRed,
           resp.data.TopDistinctGreen,
@@ -158,9 +171,6 @@ function App() {
           resp.data.TopDistinctWhite,
         ])
         setRgbCache(cacheMap)
-        console.log('Primary ', resp.data.Primary)
-        console.log('Secondary ', resp.data.Secondary)
-
       })
     return () => { }
   }, [])
@@ -170,34 +180,33 @@ function App() {
   }
 
   const theme = React.useMemo(() => createTheme(
-    palette ? {
+    imagePalette ? {
       palette: {
         primary: {
-          main: rgbResultToHex(palette?.Primary),
+          main: rgbResultToHex(imagePalette?.Primary),
         },
         secondary: {
-          main: rgbResultToHex(palette?.Secondary),
+          main: rgbResultToHex(imagePalette?.Secondary),
         }
       },
     } : {}
-  ), [palette])
-
+  ), [imagePalette])
 
   return (
     <ThemeProvider theme={theme}>
       <React.Fragment>
         {
-          palette &&
+          imagePalette &&
           <ButtonAppBar
-            secondary={rgbToHex(palette.Secondary.R, palette.Secondary.G, palette.Secondary.B)}
-            primary={rgbToHex(palette.Primary.R, palette.Primary.G, palette.Primary.B)}
-            tertiary={rgbToHex(palette.Tertiary.R, palette.Tertiary.G, palette.Tertiary.B)}
-            fourth={rgbResultToHex(palette.Fourth)}
-            fifth={rgbResultToHex(palette.Fifth)}
+            secondary={rgbToHex(imagePalette.Secondary.R, imagePalette.Secondary.G, imagePalette.Secondary.B)}
+            primary={rgbToHex(imagePalette.Primary.R, imagePalette.Primary.G, imagePalette.Primary.B)}
+            tertiary={rgbToHex(imagePalette.Tertiary.R, imagePalette.Tertiary.G, imagePalette.Tertiary.B)}
+            fourth={rgbResultToHex(imagePalette.Fourth)}
+            fifth={rgbResultToHex(imagePalette.Fifth)}
           />
         }
         <Container sx={{ overflowX: 'hidden' }}>
-          {palette &&
+          {imagePalette &&
             <Grid sx={{ paddingTop: '1.5em', paddingBottom: '1.5em' }} container spacing={2} justifyContent="center">
               {/* //   <Grid item>
                 //     <PaletteCard color={rgbResultToHex(palette?.Primary)} />
@@ -205,10 +214,16 @@ function App() {
                 //   <Grid item>
                 //     <PaletteCard color={rgbResultToHex(palette?.Secondary)}/>
                 //   </Grid> */}
-              {
-                [palette.Primary, palette.Secondary, palette.Tertiary, palette.Fourth, palette.Fifth].map((colr: RGBAResult) =>
+              {palette && 
+                Object.keys(palette)
+                .map((key: string) => key as keyof PaletteState)
+                .map((key: keyof PaletteState) =>
                   <Grid item>
-                    <PaletteCard color={rgbResultToHex(colr)} />
+                    <PaletteCard
+                      onClick={() => setSelectedColor(key !== selectedColor ? key : undefined)}
+                      selected={selectedColor === key}
+                      color={rgbResultToHex(imagePalette[key])}
+                    />
                   </Grid>)
               }
             </Grid>
@@ -217,21 +232,19 @@ function App() {
             marginTop: 5,
             display: 'flex',
             flexDirection: 'row',
-            // 'background': 'linear-gradient(to left, #f7ba2b 0%, #ea5358 100%)',
-            // 'box-shadow': 'rgba(151, 65, 252, 0.2) 0 15px 30px -5px',
           }}>
             <CardMedia
               sx={{
                 height: 450,
                 objectFit: 'contain',
               }}
-              image="http://localhost:8000/IMG_5467.jpg"
+              image="http://localhost:8000/BEACH.jpg"
               component="img"
               title=""
             />
             <CardContent sx={{ padding: '0px' }}>
-              {palette && <TopDistinctSwatches
-                imagePalette={palette}
+              {imagePalette && <TopDistinctSwatches
+                imagePalette={imagePalette}
                 onClick={handleColorClick}
               />}
               <CardActions>
