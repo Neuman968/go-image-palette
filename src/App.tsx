@@ -109,9 +109,7 @@ function App() {
   }, [])
 
   const handleColorClick = (clr: ColorResult, ev: React.ChangeEvent) => {
-    console.log('handling click ', selectedColor, imagePalette)
     if (selectedColor && imagePalette) {
-      console.log('Updating state...')
       const newState = imagePalette
       newState[selectedColor] = { R: clr.rgb.r, G: clr.rgb.g, B: clr.rgb.b, A: clr.rgb.a || 0, Count: 0 }
       setImagePalette(newState)
@@ -187,34 +185,7 @@ return (
             </CardActions>
           </CardContent>
         </Card>
-        {/* {palette &&
-              <CirclePicker
-                onChange={handleColorClick}
-                circleSize={60}
-                styles={{
-                  default: {
-                    card: {
-                      justifyContent: 'center',
-                      width: '100%',
-                      margin: '32px',
-                    }
-                  }
-                }}
-                colors={[
-                  rgbResultToHex(palette.Primary),
-                  rgbResultToHex(palette.Secondary),
-                  rgbResultToHex(palette.Tertiary),
-                  rgbResultToHex(palette.Fourth),
-                  rgbResultToHex(palette.Fifth),
-                ]} />
-            } */}
-
-        <Box display="flex" justifyContent="center">
-
-
-        </Box>
       </Container>
-
     </React.Fragment>
   </ThemeProvider>
 );
