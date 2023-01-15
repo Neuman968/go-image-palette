@@ -47,6 +47,7 @@
     ]
   },
   "devDependencies": {
+    "@types/golang-wasm": "^1.15.0",
     "@types/react-color": "^3.0.6"
   }
 }
