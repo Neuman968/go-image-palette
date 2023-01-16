@@ -18,6 +18,8 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import PaletteCard from './components/PaletteCard';
 import { PaletteState } from './types/Palette';
 import TopDistinctSwatches from './components/TopDistinctSwatches';
+import { useLoadedWasm, WasmProvider } from './context/LoadedWasm';
+import ViewImagePalette from './pages/ViewImagePalette';
 
 function ButtonAppBar({ primary, secondary, tertiary, fourth, fifth }: { primary: string, secondary: string, tertiary: string, fourth: string, fifth: string }) {
   return (
@@ -69,126 +71,38 @@ const newCacheFromResult = (arr: Array<Array<RGBAResult>>): Map<string, RGBAResu
   return newCache
 }
 
+type GoFns = {
+  SayHi?: () => void,
+}
+
+function TheComponent() {
+  const wasm = useLoadedWasm<GoFns>()
+  wasm?.SayHi?.()
+  return <p>{wasm ? 'Loaded!! ' : 'Loading....'}</p>
+}
+
 function App() {
 
   const [imagePalette, setImagePalette] = React.useState<ImagePalette | undefined>()
 
-  const [palette, setPalette] = React.useState<PaletteState | undefined>()
-
-  const [selectedColor, setSelectedColor] = React.useState<keyof PaletteState | undefined>()
-
-  const [rgbCache, setRgbCache] = React.useState<Map<string, RGBAResult>>()
-
-  React.useEffect(() => {
-    axios.get<ImagePalette>('http://localhost:8000/colors.json')
-      .then((resp) => {
-        setImagePalette(resp.data)
-        setPalette({
-          Primary: resp.data.Primary,
-          Secondary: resp.data.Secondary,
-          Tertiary: resp.data.Tertiary,
-          Fourth: resp.data.Fourth,
-          Fifth: resp.data.Fifth,
-        })
-        const cacheMap = newCacheFromResult([
-          resp.data.TopDistinctRed,
-          resp.data.TopDistinctGreen,
-          resp.data.TopDistinctBlue,
-          resp.data.TopDistinctYellow,
-          resp.data.TopDistinctOrange,
-          resp.data.TopDistinctPurple,
-          resp.data.TopDistinctPink,
-          resp.data.TopDistinctBrown,
-          resp.data.TopDistinctGray,
-          resp.data.TopDistinctBlack,
-          resp.data.TopDistinctWhite,
-        ])
-        setRgbCache(cacheMap)
-      })
-    return () => { }
-  }, [])
-
-  const handleColorClick = (clr: ColorResult, ev: React.ChangeEvent) => {
-    if (selectedColor && imagePalette) {
-      const newState = imagePalette
-      newState[selectedColor] = { R: clr.rgb.r, G: clr.rgb.g, B: clr.rgb.b, A: clr.rgb.a || 0, Count: 0 }
-      setImagePalette(newState)
-      setSelectedColor(undefined)
-    }
-  }
-
-const theme = React.useMemo(() => createTheme(
-  imagePalette ? {
-    palette: {
-      primary: {
-        main: rgbResultToHex(imagePalette?.Primary),
-      },
-      secondary: {
-        main: rgbResultToHex(imagePalette?.Secondary),
-      }
-    },
-  } : {}
-), [imagePalette])
-
-return (
-  <ThemeProvider theme={theme}>
-    <React.Fragment>
-      {
-        imagePalette &&
-        <ButtonAppBar
-          secondary={rgbToHex(imagePalette.Secondary.R, imagePalette.Secondary.G, imagePalette.Secondary.B)}
-          primary={rgbToHex(imagePalette.Primary.R, imagePalette.Primary.G, imagePalette.Primary.B)}
-          tertiary={rgbToHex(imagePalette.Tertiary.R, imagePalette.Tertiary.G, imagePalette.Tertiary.B)}
-          fourth={rgbResultToHex(imagePalette.Fourth)}
-          fifth={rgbResultToHex(imagePalette.Fifth)}
-        />
-      }
-      <Container sx={{ overflowX: 'hidden' }}>
-        {imagePalette &&
-          <Grid sx={{ paddingTop: '1.5em', paddingBottom: '1.5em' }} container spacing={2} justifyContent="center">
-            {palette &&
-              Object.keys(palette)
-                .map((key: string) => key as keyof PaletteState)
-                .map((key: keyof PaletteState) =>
-                  <Grid item>
-                    <PaletteCard
-                      onClick={() => setSelectedColor(key !== selectedColor ? key : undefined)}
-                      selected={selectedColor === key}
-                      color={rgbResultToHex(imagePalette[key])}
-                    />
-                  </Grid>)
-            }
-          </Grid>
+  const theme = React.useMemo(() => createTheme(
+    imagePalette ? {
+      palette: {
+        primary: {
+          main: rgbResultToHex(imagePalette?.Primary),
+        },
+        secondary: {
+          main: rgbResultToHex(imagePalette?.Secondary),
         }
-        <Card sx={{
-          marginTop: 5,
-          display: 'flex',
-          flexDirection: 'row',
-        }}>
-          <CardMedia
-            sx={{
-              height: 450,
-              objectFit: 'contain',
-            }}
-            image="http://localhost:8000/BEACH.jpg"
-            component="img"
-            title=""
-          />
-          <CardContent sx={{ padding: '0px' }}>
-            {imagePalette && <TopDistinctSwatches
-              imagePalette={imagePalette}
-              onClick={handleColorClick}
-            />}
-            <CardActions>
-              <Button variant="contained" size="small">Share</Button>
-              <Button variant="contained" size="small">Upload Another</Button>
-            </CardActions>
-          </CardContent>
-        </Card>
-      </Container>
-    </React.Fragment>
+      },
+    } : {}
+  ), [imagePalette])
+
+  return <ThemeProvider theme={theme}>
+    <WasmProvider fetchParams="go-wasm.wasm">
+      <ViewImagePalette imagePalette={imagePalette} setImagePalette={setImagePalette} />
+    </WasmProvider>
   </ThemeProvider>
-);
 }
 
 export default App;
