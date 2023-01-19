@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" ><!---->
+    <defs data-v-fde0c5aa="">
+        <linearGradient data-v-fde0c5aa="" gradientTransform="rotate(25)"
+            id="122ce172-7cbf-4c8d-b409-39181b5dddef" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop data-v-fde0c5aa="" offset="0%" stop-color="#326D8A" stop-opacity="1" />
+            <stop data-v-fde0c5aa="" offset="100%" stop-color="#D468D7" stop-opacity="1" />
+        </linearGradient>
+    </defs>
+    <g data-v-fde0c5aa="" id="13793dfc-2833-491a-957b-d7e872f0063d" stroke="none"
+        fill="url(#122ce172-7cbf-4c8d-b409-39181b5dddef)"
+        transform="matrix(8,0,0,8,8,8)">
+        <path d="M0 32h32V0H0v32zM2.038 2.038h27.923v27.923H2.038V2.038z" />
+        <path d="M4.038 27.962h23.923V4.038H4.038v23.924zM21.049 8.25h3.402v3.402h-3.402V8.25zm0 6.049h3.402v3.402h-3.402v-3.402zm0 6.049h3.402v3.402h-3.402v-3.402zM14.299 8.25h3.402v3.402h-3.402V8.25zm0 6.049h3.402v3.402h-3.402v-3.402zm0 6.049h3.402v3.402h-3.402v-3.402zM7.549 8.25h3.402v3.402H7.549V8.25zm0 6.049h3.402v3.402H7.549v-3.402zm0 6.049h3.402v3.402H7.549v-3.402z" />
+    </g><!---->
+</svg>

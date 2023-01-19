@@ -1,0 +1,14 @@
+
+Hope you enjoy your new logo, here are the people that
+made your beautiful logo happen :)/Users/johnflynn/Projects/web-image-palette/info.txt
+font name: GlacialIndifference-Regular
+font link: https://hanken.co/product/hk-grotesk/
+font author: Hanken Design Co.
+font author site: https://hanken.co/
+
+
+icon designer: Alfredo @ IconsAlfredo.us
+icon designer link: /AlfredoCreates
+        
+{"bg":"#F0F3F5","icon-gradient-0":"#326D8A","icon-gradient-1":"#D468D7","font":"#2E373B","slogan":"#424b4f"}
+      
