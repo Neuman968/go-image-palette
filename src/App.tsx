@@ -22,6 +22,7 @@ import { useLoadedWasm, WasmProvider } from './context/LoadedWasm';
 import ViewImagePalette from './pages/ViewImagePalette';
 import { rgbResultToHex } from './utils/colorUtils';
 import { ReactComponent as Logo } from './assets/logo.svg'
+import UploadPhotoDisplay from './components/UploadPhotoDisplay';
 
 type GoFns = {
   SayHi?: () => void,
@@ -61,7 +62,7 @@ function App() {
     <WasmProvider fetchParams="go-wasm.wasm">
       {/* <ViewImagePalette imagePalette={imagePalette} setImagePalette={setImagePalette} /> */}
       <Heading />
-      <p>Hello!</p>
+      <UploadPhotoDisplay />
     </WasmProvider>
   </ThemeProvider>
 }
