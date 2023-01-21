@@ -23,6 +23,8 @@ import ViewImagePalette from './pages/ViewImagePalette';
 import { rgbResultToHex } from './utils/colorUtils';
 import { ReactComponent as Logo } from './assets/logo.svg'
 import UploadPhotoDisplay from './components/UploadPhotoDisplay';
+import { Routes, Route } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 
 type GoFns = {
   SayHi?: () => void,
@@ -60,9 +62,15 @@ function App() {
 
   return <ThemeProvider theme={theme}>
     <WasmProvider fetchParams="go-wasm.wasm">
-      {/* <ViewImagePalette imagePalette={imagePalette} setImagePalette={setImagePalette} /> */}
-      <Heading />
-      <UploadPhotoDisplay />
+      <BrowserRouter>
+        {/* <ViewImagePalette imagePalette={imagePalette} setImagePalette={setImagePalette} /> */}
+        <Heading />
+        <Routes>
+          <Route index element={<UploadPhotoDisplay />} />
+          <Route path="/examples" element={<></>}/>
+          <Route path="/view" element={<ViewImagePalette imagePalette={imagePalette} setImagePalette={setImagePalette} />} />
+        </Routes>
+      </BrowserRouter>
     </WasmProvider>
   </ThemeProvider>
 }
