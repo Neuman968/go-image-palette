@@ -22,7 +22,7 @@ import ViewImagePalette from './pages/ViewImagePalette';
 import { rgbResultToHex } from './utils/colorUtils';
 import { ReactComponent as Logo } from './assets/logo.svg'
 import UploadPhotoDisplay from './components/UploadPhotoDisplay';
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, redirect } from "react-router-dom";
 import { BrowserRouter } from "react-router-dom";
 import { defaultPalette } from './types/DefaultPaletteOptions'
 import { useLoadedWasm } from './context/LoadedWasm';
@@ -60,6 +60,11 @@ function App() {
     file.arrayBuffer().then((arr: ArrayBuffer) => {
       console.log('Loading File...')
       const resultJson = loadedWasm?.GetJsonForImage(new Uint8Array(arr))
+      if (resultJson) {
+        const iamgePaletteResp = JSON.parse(resultJson)
+        setImagePalette(iamgePaletteResp)
+        redirect('/view')
+      }
       console.log('Result Json is ', resultJson)
     })
   }
