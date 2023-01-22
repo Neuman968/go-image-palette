@@ -1,7 +1,7 @@
 import { Button, ButtonGroup, Grid, Typography } from '@mui/material'
 import { Box, Container } from '@mui/system'
 import beachImage from '../assets/BEACH.jpg'
-import React from 'react'
+import React, { FormEvent } from 'react'
 
 function UploadPhotoDisplay() {
     return <Container>
@@ -14,7 +14,15 @@ function UploadPhotoDisplay() {
                     </Typography>
                     <Box pt={2} display="flex" justifyContent="center">
                         <Box pr={2}>
-                            <Button variant="contained">Upload</Button>
+                            <input
+                                style={{ display: "none" }}
+                                id="contained-button-file"
+                                type="file"
+                                onChange={(ev: React.ChangeEvent<HTMLInputElement>) => { console.log('On Submit!', ev.target.files)}}
+                            />
+                            <label htmlFor="contained-button-file">
+                                <Button variant="contained" component="span">Upload</Button>
+                            </label>
                         </Box>
                         <Box pl={2}>
                             <Button variant="contained">Examples</Button>

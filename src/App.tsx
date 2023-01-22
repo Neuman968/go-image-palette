@@ -46,7 +46,6 @@ function Heading() {
 function App() {
 
   const [imagePalette, setImagePalette] = React.useState<ImagePalette | undefined>()
-  console.log('Palette is ', imagePalette)
 
   const theme = React.useMemo(() => createTheme(
     {
@@ -64,7 +63,6 @@ function App() {
   return <ThemeProvider theme={theme}>
     <WasmProvider fetchParams="go-wasm.wasm">
       <BrowserRouter>
-        {/* <ViewImagePalette imagePalette={imagePalette} setImagePalette={setImagePalette} /> */}
         <Heading />
         <Routes>
           <Route index element={<UploadPhotoDisplay />} />
