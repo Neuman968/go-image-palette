@@ -3,7 +3,11 @@ import { Box, Container } from '@mui/system'
 import beachImage from '../assets/BEACH.jpg'
 import React, { FormEvent } from 'react'
 
-function UploadPhotoDisplay() {
+type Props = {
+    setFile: (file: File) => void,
+}
+
+function UploadPhotoDisplay(props: Props) {
     return <Container>
         <Grid container pt={10} justifyContent="center" spacing={10}>
             <Grid item xs={4} sx={{ boxSizing: 'content-box' }}>
@@ -18,7 +22,12 @@ function UploadPhotoDisplay() {
                                 style={{ display: "none" }}
                                 id="contained-button-file"
                                 type="file"
-                                onChange={(ev: React.ChangeEvent<HTMLInputElement>) => { console.log('On Submit!', ev.target.files)}}
+                                onChange={(ev: React.ChangeEvent<HTMLInputElement>) => {
+                                    const file = ev.target?.files?.[0]
+                                    if (file) {
+                                        props.setFile(file)
+                                    }
+                                }}
                             />
                             <label htmlFor="contained-button-file">
                                 <Button variant="contained" component="span">Upload</Button>

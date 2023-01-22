@@ -18,7 +18,6 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import PaletteCard from './components/PaletteCard';
 import { PaletteState } from './types/Palette';
 import TopDistinctSwatches from './components/TopDistinctSwatches';
-import { useLoadedWasm, WasmProvider } from './context/LoadedWasm';
 import ViewImagePalette from './pages/ViewImagePalette';
 import { rgbResultToHex } from './utils/colorUtils';
 import { ReactComponent as Logo } from './assets/logo.svg'
@@ -26,6 +25,7 @@ import UploadPhotoDisplay from './components/UploadPhotoDisplay';
 import { Routes, Route } from "react-router-dom";
 import { BrowserRouter } from "react-router-dom";
 import { defaultPalette } from './types/DefaultPaletteOptions'
+import { useLoadedWasm } from './context/LoadedWasm';
 type GoFns = {
   SayHi?: () => void,
 }
@@ -43,9 +43,26 @@ function Heading() {
   </Box>
 }
 
+type GoWasmBinding = {
+  GetJsonForImage: (byteArr: Uint8Array) => string
+}
+
 function App() {
 
   const [imagePalette, setImagePalette] = React.useState<ImagePalette | undefined>()
+
+  const [file, setFile] = React.useState<File | undefined>()
+
+  const loadedWasm = useLoadedWasm<GoWasmBinding>()
+
+  const setFileAndProcess = (file: File) => {
+    setFile(file)
+    file.arrayBuffer().then((arr: ArrayBuffer) => {
+      console.log('Loading File...')
+      const resultJson = loadedWasm?.GetJsonForImage(new Uint8Array(arr))
+      console.log('Result Json is ', resultJson)
+    })
+  }
 
   const theme = React.useMemo(() => createTheme(
     {
@@ -61,16 +78,14 @@ function App() {
   ), [imagePalette])
 
   return <ThemeProvider theme={theme}>
-    <WasmProvider fetchParams="go-wasm.wasm">
-      <BrowserRouter>
-        <Heading />
-        <Routes>
-          <Route index element={<UploadPhotoDisplay />} />
-          <Route path="/examples" element={<></>}/>
-          <Route path="/view" element={<ViewImagePalette imagePalette={imagePalette} setImagePalette={setImagePalette} />} />
-        </Routes>
-      </BrowserRouter>
-    </WasmProvider>
+    <BrowserRouter>
+      <Heading />
+      <Routes>
+        <Route index element={<UploadPhotoDisplay setFile={setFileAndProcess} />} />
+        <Route path="/examples" element={<></>} />
+        <Route path="/view" element={<ViewImagePalette imagePalette={imagePalette} setImagePalette={setImagePalette} />} />
+      </Routes>
+    </BrowserRouter>
   </ThemeProvider>
 }
 
