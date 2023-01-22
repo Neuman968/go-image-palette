@@ -25,7 +25,7 @@ import { ReactComponent as Logo } from './assets/logo.svg'
 import UploadPhotoDisplay from './components/UploadPhotoDisplay';
 import { Routes, Route } from "react-router-dom";
 import { BrowserRouter } from "react-router-dom";
-
+import { defaultPalette } from './types/DefaultPaletteOptions'
 type GoFns = {
   SayHi?: () => void,
 }
@@ -46,18 +46,19 @@ function Heading() {
 function App() {
 
   const [imagePalette, setImagePalette] = React.useState<ImagePalette | undefined>()
+  console.log('Palette is ', imagePalette)
 
   const theme = React.useMemo(() => createTheme(
-    imagePalette ? {
-      palette: {
+    {
+      palette: imagePalette ? {
         primary: {
           main: rgbResultToHex(imagePalette?.Primary),
         },
         secondary: {
           main: rgbResultToHex(imagePalette?.Secondary),
         }
-      },
-    } : {}
+      } : defaultPalette,
+    }
   ), [imagePalette])
 
   return <ThemeProvider theme={theme}>
