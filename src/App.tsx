@@ -22,8 +22,7 @@ import ViewImagePalette from './pages/ViewImagePalette';
 import { rgbResultToHex } from './utils/colorUtils';
 import { ReactComponent as Logo } from './assets/logo.svg'
 import UploadPhotoDisplay from './components/UploadPhotoDisplay';
-import { Routes, Route, redirect } from "react-router-dom";
-import { BrowserRouter } from "react-router-dom";
+import { Routes, Route, redirect, useNavigate } from "react-router-dom";
 import { defaultPalette } from './types/DefaultPaletteOptions'
 import { useLoadedWasm } from './context/LoadedWasm';
 type GoFns = {
@@ -55,15 +54,19 @@ function App() {
 
   const loadedWasm = useLoadedWasm<GoWasmBinding>()
 
+  const navigate = useNavigate()
+
   const setFileAndProcess = (file: File) => {
     setFile(file)
     file.arrayBuffer().then((arr: ArrayBuffer) => {
-      console.log('Loading File...')
+      const now = new Date()
+      console.log('Loading File... ', now)
       const resultJson = loadedWasm?.GetJsonForImage(new Uint8Array(arr))
       if (resultJson) {
+        console.log('Elapsed ', new Date().getTime() - now.getTime(), new Date())
         const iamgePaletteResp = JSON.parse(resultJson)
         setImagePalette(iamgePaletteResp)
-        redirect('/view')
+        navigate('/view')
       }
       console.log('Result Json is ', resultJson)
     })
@@ -83,14 +86,12 @@ function App() {
   ), [imagePalette])
 
   return <ThemeProvider theme={theme}>
-    <BrowserRouter>
       <Heading />
       <Routes>
         <Route index element={<UploadPhotoDisplay setFile={setFileAndProcess} />} />
         <Route path="/examples" element={<></>} />
-        <Route path="/view" element={<ViewImagePalette imagePalette={imagePalette} setImagePalette={setImagePalette} />} />
+        <Route path="/view" element={<ViewImagePalette file={file!!} imagePalette={imagePalette!!} setImagePalette={setImagePalette} />} />
       </Routes>
-    </BrowserRouter>
   </ThemeProvider>
 }
 

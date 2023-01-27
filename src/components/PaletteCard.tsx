@@ -13,9 +13,8 @@ function PaletteCard(props: Props) {
         onClick={props.onClick}
         sx={{
             width: '8.875em',
-            height: '11.5em',
+            height: '8.5em',
             '&:hover': {
-                transform: 'translateY(-10%);',
                 boxShadow: !props.selected ? `${props.color} 0px 13px 47px -5px, rgba(180, 71, 71, 0.3) 0px 8px 16px -8px` : ''
             },
             boxShadow: props.selected ? 'gold 0px 9px 43px -2px, rgba(180, 71, 71, 0.3) 0px 4px 12px -4px' : '',
@@ -24,7 +23,7 @@ function PaletteCard(props: Props) {
         <CardContent>
             <Box sx={{
                 backgroundColor: props.color,
-                height: '6.5em',
+                height: '4.5em',
                 width: '100%',
                 borderRadius: '8px',
             }}>

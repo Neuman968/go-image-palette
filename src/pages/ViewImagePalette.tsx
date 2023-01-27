@@ -17,7 +17,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import PaletteCard from '../components/PaletteCard';
 import { PaletteState } from '../types/Palette';
 import TopDistinctSwatches from '../components/TopDistinctSwatches';
-import { useLoadedWasm, WasmProvider } from '../context/LoadedWasm';
+import { useNavigate } from 'react-router';
 
 function ButtonViewImagePaletteBar({ primary, secondary, tertiary, fourth, fifth }: { primary: string, secondary: string, tertiary: string, fourth: string, fifth: string }) {
     return (
@@ -29,7 +29,7 @@ function ButtonViewImagePaletteBar({ primary, secondary, tertiary, fourth, fifth
                 }}
             >
                 <Toolbar>
-                    <IconButton
+                    {/* <IconButton
                         size="large"
                         edge="start"
                         color="inherit"
@@ -37,7 +37,7 @@ function ButtonViewImagePaletteBar({ primary, secondary, tertiary, fourth, fifth
                         sx={{ mr: 2 }}
                     >
                         <MenuIcon />
-                    </IconButton>
+                    </IconButton> */}
                 </Toolbar>
             </AppBar>
         </Box>
@@ -69,16 +69,13 @@ const newCacheFromResult = (arr: Array<Array<RGBAResult>>): Map<string, RGBAResu
     return newCache
 }
 
-type GoFns = {
-    SayHi?: () => void,
-}
-
 type Props = {
-    imagePalette: ImagePalette | undefined,
+    file: File,
+    imagePalette: ImagePalette,
     setImagePalette: (palette: ImagePalette) => void,
 }
 
-function ViewImagePalette(props: Props) {
+function ViewImagePalettePage(props: Props) {
 
     const [palette, setPalette] = React.useState<PaletteState | undefined>()
 
@@ -86,32 +83,70 @@ function ViewImagePalette(props: Props) {
 
     const [rgbCache, setRgbCache] = React.useState<Map<string, RGBAResult>>()
 
+    const navigate = useNavigate()
+
     React.useEffect(() => {
-        axios.get<ImagePalette>('http://localhost:8000/colors.json')
-            .then((resp) => {
-                props.setImagePalette(resp.data)
-                setPalette({
-                    Primary: resp.data.Primary,
-                    Secondary: resp.data.Secondary,
-                    Tertiary: resp.data.Tertiary,
-                    Fourth: resp.data.Fourth,
-                    Fifth: resp.data.Fifth,
-                })
-                const cacheMap = newCacheFromResult([
-                    resp.data.TopDistinctRed,
-                    resp.data.TopDistinctGreen,
-                    resp.data.TopDistinctBlue,
-                    resp.data.TopDistinctYellow,
-                    resp.data.TopDistinctOrange,
-                    resp.data.TopDistinctPurple,
-                    resp.data.TopDistinctPink,
-                    resp.data.TopDistinctBrown,
-                    resp.data.TopDistinctGray,
-                    resp.data.TopDistinctBlack,
-                    resp.data.TopDistinctWhite,
-                ])
-                setRgbCache(cacheMap)
-            })
+        const cacheMap = newCacheFromResult([
+            props.imagePalette.TopDistinctRed,
+            props.imagePalette.TopDistinctGreen,
+            props.imagePalette.TopDistinctBlue,
+            props.imagePalette.TopDistinctYellow,
+            props.imagePalette.TopDistinctOrange,
+            props.imagePalette.TopDistinctPurple,
+            props.imagePalette.TopDistinctPink,
+            props.imagePalette.TopDistinctBrown,
+            props.imagePalette.TopDistinctGray,
+            props.imagePalette.TopDistinctBlack,
+            props.imagePalette.TopDistinctWhite,
+        ])
+        setRgbCache(cacheMap)
+    }, [])
+
+    React.useEffect(() => {
+        setPalette({
+            Primary: props.imagePalette.Primary,
+            Secondary: props.imagePalette.Secondary,
+            Tertiary: props.imagePalette.Tertiary,
+            Fourth: props.imagePalette.Fourth,
+            Fifth: props.imagePalette.Fifth,
+        })
+        const cacheMap = newCacheFromResult([
+            props.imagePalette.TopDistinctRed,
+            props.imagePalette.TopDistinctGreen,
+            props.imagePalette.TopDistinctBlue,
+            props.imagePalette.TopDistinctYellow,
+            props.imagePalette.TopDistinctOrange,
+            props.imagePalette.TopDistinctPurple,
+            props.imagePalette.TopDistinctPink,
+            props.imagePalette.TopDistinctBrown,
+            props.imagePalette.TopDistinctGray,
+            props.imagePalette.TopDistinctBlack,
+            props.imagePalette.TopDistinctWhite,
+        ])
+        setRgbCache(cacheMap)
+        console.log('Reds ', props.imagePalette.TopDistinctRed.length)
+        // const canvas = document.getElementById('card-canvas') as HTMLCanvasElement
+        // const img = new window.Image()
+        // img.src = URL.createObjectURL(props.file)
+
+        // var hRatio = canvas.width / img.width;
+        // var vRatio = canvas.height / img.height;
+        // var ratio = Math.min(hRatio, vRatio);
+        // var centerShift_x = (canvas.width - img.width * ratio) / 2;
+        // var centerShift_y = (canvas.height - img.height * ratio) / 2;
+        // var ctx = canvas.getContext('2d')!!
+
+        // ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // img.onload = () => {
+        //     ctx.drawImage(img, 0, 0, img.width, img.height,
+        //         centerShift_x, centerShift_y, img.width * ratio, img.height * ratio);
+        // }
+        // var img = new Image();
+        // img.src = URL.createObjectURL(props.file);
+        // img.onload = function() {
+        //     ctx?.drawImage(img, 0, 0, 400, 450);
+        // }
+
         return () => { }
     }, [])
 
@@ -123,7 +158,6 @@ function ViewImagePalette(props: Props) {
             setSelectedColor(undefined)
         }
     }
-
     return (
         <React.Fragment>
             {
@@ -138,7 +172,7 @@ function ViewImagePalette(props: Props) {
             }
             <Container sx={{ overflowX: 'hidden' }}>
                 {props.imagePalette &&
-                    <Grid sx={{ paddingTop: '1.5em', paddingBottom: '1.5em' }} container spacing={2} justifyContent="center">
+                    <Grid sx={{ paddingTop: '1em', paddingBottom: '.2em' }} container spacing={2} justifyContent="center">
                         {palette &&
                             Object.keys(palette)
                                 .map((key: string) => key as keyof PaletteState)
@@ -154,7 +188,7 @@ function ViewImagePalette(props: Props) {
                     </Grid>
                 }
                 <Card sx={{
-                    marginTop: 5,
+                    marginTop: 2,
                     display: 'flex',
                     flexDirection: 'row',
                 }}>
@@ -163,8 +197,8 @@ function ViewImagePalette(props: Props) {
                             height: 450,
                             objectFit: 'contain',
                         }}
-                        image="http://localhost:8000/BEACH.jpg"
                         component="img"
+                        src={URL.createObjectURL(props.file)}
                         title=""
                     />
                     <CardContent sx={{ padding: '0px' }}>
@@ -181,6 +215,26 @@ function ViewImagePalette(props: Props) {
             </Container>
         </React.Fragment>
     );
+}
+
+type ViewImageProps = {
+    file: File | undefined,
+    imagePalette: ImagePalette | undefined,
+    setImagePalette: (palette: ImagePalette) => void,
+}
+
+function ViewImagePalette(props: ViewImageProps) {
+    const navigate = useNavigate()
+
+    const shouldRedirect = !props.file || !props.imagePalette
+
+    if (shouldRedirect) {
+        navigate('/')
+    }
+
+    return !shouldRedirect
+        ? <ViewImagePalettePage file={props.file!!} imagePalette={props.imagePalette!!} setImagePalette={props.setImagePalette} />
+        : <></>
 }
 
 export default ViewImagePalette;
