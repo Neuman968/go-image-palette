@@ -124,7 +124,6 @@ function ViewImagePalettePage(props: Props) {
             props.imagePalette.TopDistinctWhite,
         ])
         setRgbCache(cacheMap)
-        console.log('Reds ', props.imagePalette.TopDistinctRed.length)
         // const canvas = document.getElementById('card-canvas') as HTMLCanvasElement
         // const img = new window.Image()
         // img.src = URL.createObjectURL(props.file)
