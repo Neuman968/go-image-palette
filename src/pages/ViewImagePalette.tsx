@@ -81,6 +81,8 @@ function ViewImagePalettePage(props: Props) {
 
     const [selectedColor, setSelectedColor] = React.useState<keyof PaletteState | undefined>()
 
+    const [selectedRgbaColor, setSelectedRgbaColor] = React.useState<RGBAResult | undefined>(undefined)
+
     const [rgbCache, setRgbCache] = React.useState<Map<string, RGBAResult>>()
 
     const navigate = useNavigate()
@@ -150,13 +152,29 @@ function ViewImagePalettePage(props: Props) {
     }, [])
 
     const handleColorClick = (clr: ColorResult, ev: React.ChangeEvent) => {
+        const selectedSwatch = { R: clr.rgb.r, G: clr.rgb.g, B: clr.rgb.b, A: clr.rgb.a || 0, Count: 0 }
         if (selectedColor && props.imagePalette) {
             const newState = props.imagePalette
-            newState[selectedColor] = { R: clr.rgb.r, G: clr.rgb.g, B: clr.rgb.b, A: clr.rgb.a || 0, Count: 0 }
+            newState[selectedColor] = selectedSwatch
             props.setImagePalette(newState)
             setSelectedColor(undefined)
+        } else {
+            setSelectedRgbaColor(selectedSwatch)
         }
     }
+
+    const paletteCardOnClick = (paletteKey: keyof PaletteState) => {
+        if (selectedRgbaColor) {
+            const newState = props.imagePalette
+            newState[paletteKey] = selectedRgbaColor
+            props.setImagePalette(newState)
+            setSelectedColor(undefined)
+            setSelectedRgbaColor(undefined)
+        } else {
+            setSelectedColor(paletteKey !== selectedColor ? paletteKey : undefined)
+        }
+    }
+
     return (
         <React.Fragment>
             {
@@ -178,7 +196,7 @@ function ViewImagePalettePage(props: Props) {
                                 .map((key: keyof PaletteState) =>
                                     <Grid item>
                                         <PaletteCard
-                                            onClick={() => setSelectedColor(key !== selectedColor ? key : undefined)}
+                                            onClick={() => paletteCardOnClick(key)}
                                             selected={selectedColor === key}
                                             color={rgbResultToHex(props.imagePalette!![key])}
                                         />

@@ -12,8 +12,8 @@ function UploadPhotoDisplay(props: Props) {
         <Grid container pt={10} justifyContent="center" spacing={10}>
             <Grid item xs={4} sx={{ boxSizing: 'content-box' }}>
                 <Box justifyContent="center" sx={{ width: '100%' }}>
-                    <Typography pt={3} pb={3} align="center" variant="h4">Generate a Color Palette from any photo.</Typography>
-                    <Typography align="left" variant="body1">
+                    <Typography pt={6} pb={6} align="center" variant="h4">Generate a Color Palette from any photo.</Typography>
+                    <Typography pb={3} align="left" variant="body1">
                         Draw inspiration from the colors of your photos. All processing is done using your device's browser, so your picture is never uploaded anywhere!
                     </Typography>
                     <Box pt={2} display="flex" justifyContent="center">
@@ -41,7 +41,7 @@ function UploadPhotoDisplay(props: Props) {
             </Grid>
             <Grid item xs={4}>
                 <Box>
-                    <img alt="Beach picture" style={{ width: '300px', height: '300px', borderRadius: '8px' }} src={beachImage} />
+                    <img alt="Beach picture" style={{ width: '450px', height: '400px', borderRadius: '8px' }} src={beachImage} />
                 </Box>
             </Grid>
         </Grid>
