@@ -65,6 +65,8 @@ function App() {
       if (resultJson) {
         console.log('Elapsed ', new Date().getTime() - now.getTime(), new Date())
         const iamgePaletteResp = JSON.parse(resultJson)
+        console.log('Logging response...')
+        console.log(imagePalette)
         setImagePalette(iamgePaletteResp)
         navigate('/view')
       }

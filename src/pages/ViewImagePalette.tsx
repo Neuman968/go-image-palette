@@ -18,6 +18,7 @@ import PaletteCard from '../components/PaletteCard';
 import { PaletteState } from '../types/Palette';
 import TopDistinctSwatches from '../components/TopDistinctSwatches';
 import { useNavigate } from 'react-router';
+import ToolDrawer from '../components/ToolDrawer';
 
 function ButtonViewImagePaletteBar({ primary, secondary, tertiary, fourth, fifth }: { primary: string, secondary: string, tertiary: string, fourth: string, fifth: string }) {
     return (
@@ -251,7 +252,10 @@ function ViewImagePalette(props: ViewImageProps) {
     }
 
     return !shouldRedirect
-        ? <ViewImagePalettePage file={props.file!!} imagePalette={props.imagePalette!!} setImagePalette={props.setImagePalette} />
+        ? <React.Fragment>
+            <ToolDrawer/>
+            <ViewImagePalettePage file={props.file!!} imagePalette={props.imagePalette!!} setImagePalette={props.setImagePalette} />
+        </React.Fragment>
         : <></>
 }
 
