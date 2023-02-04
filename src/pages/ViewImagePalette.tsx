@@ -25,7 +25,8 @@ function ButtonViewImagePaletteBar({ primary, secondary, tertiary, fourth, fifth
             <AppBar
                 position="static"
                 sx={{
-                    backgroundImage: `linear-gradient(144deg,${primary}, ${secondary}, ${tertiary}, ${fourth}, ${fifth})`
+                    backgroundImage: `linear-gradient(144deg,${primary}, ${secondary}, ${tertiary}, ${fourth}, ${fifth})`,
+                    height: '15px',
                 }}
             >
                 <Toolbar>
@@ -225,7 +226,7 @@ function ViewImagePalettePage(props: Props) {
                         />}
                         <CardActions>
                             <Button variant="contained" size="small">Share</Button>
-                            <Button variant="contained" size="small">Upload Another</Button>
+                            <Button variant="contained" size="small" onClick={() => navigate('/')}>Upload Another</Button>
                         </CardActions>
                     </CardContent>
                 </Card>

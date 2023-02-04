@@ -34,7 +34,7 @@ function Heading() {
     <AppBar style={{ backgroundColor: '#333340' }} position="static">
       <Toolbar>
         <Logo style={{ width: '40px', height: '40px' }} />
-        <Typography>
+        <Typography style={{ color: 'white' }}>
           Pic Palette
         </Typography>
       </Toolbar>
