@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"image"
 	"image/color"
 	_ "image/jpeg"
@@ -198,24 +197,26 @@ func GetJsonImageForBytes(imgByte []byte, numberOfColors *int, numberOfTopDistin
 
 func GetJsonForImage(imgData *image.Image, numberOfColors *int, numberOfTopDistincts *int) string {
 
-	var colorMap = make(map[int]map[color.Color]ColorStruct)
+	// var colorMap = make(map[int]map[color.Color]ColorStruct)
 
-	colorMap[red] = make(map[color.Color]ColorStruct)
-	colorMap[green] = make(map[color.Color]ColorStruct)
-	colorMap[blue] = make(map[color.Color]ColorStruct)
-	colorMap[yellow] = make(map[color.Color]ColorStruct)
-	colorMap[orange] = make(map[color.Color]ColorStruct)
-	colorMap[purple] = make(map[color.Color]ColorStruct)
-	colorMap[black] = make(map[color.Color]ColorStruct)
-	colorMap[white] = make(map[color.Color]ColorStruct)
-	colorMap[brown] = make(map[color.Color]ColorStruct)
-	colorMap[gray] = make(map[color.Color]ColorStruct)
-	colorMap[pink] = make(map[color.Color]ColorStruct)
+	// colorMap[red] = make(map[color.Color]ColorStruct)
+	// colorMap[green] = make(map[color.Color]ColorStruct)
+	// colorMap[blue] = make(map[color.Color]ColorStruct)
+	// colorMap[yellow] = make(map[color.Color]ColorStruct)
+	// colorMap[orange] = make(map[color.Color]ColorStruct)
+	// colorMap[purple] = make(map[color.Color]ColorStruct)
+	// colorMap[black] = make(map[color.Color]ColorStruct)
+	// colorMap[white] = make(map[color.Color]ColorStruct)
+	// colorMap[brown] = make(map[color.Color]ColorStruct)
+	// colorMap[gray] = make(map[color.Color]ColorStruct)
+	// colorMap[pink] = make(map[color.Color]ColorStruct)
 
 	var largest ColorStruct
 
-	for y := (*imgData).Bounds().Min.Y; y < (*imgData).Bounds().Max.Y; y += 2 {
-		for x := (*imgData).Bounds().Min.X; x < (*imgData).Bounds().Max.X; x += 2 {
+	var colorMap = make(map[color.Color]ColorStruct)
+
+	for y := (*imgData).Bounds().Min.Y; y < (*imgData).Bounds().Max.Y; y += 1 {
+		for x := (*imgData).Bounds().Min.X; x < (*imgData).Bounds().Max.X; x += 1 {
 
 			colr := (*imgData).At(x, y)
 			colorStruct := toColorStruct(colr)
@@ -237,7 +238,7 @@ func GetJsonForImage(imgData *image.Image, numberOfColors *int, numberOfTopDisti
 				largest = colorStruct
 			}
 
-			colorMap[colorStruct.category][colr] = colorStruct
+			colorMap[colr] = colorStruct
 		}
 	}
 	// end := time.Since(start)
@@ -291,9 +292,10 @@ func GetJsonForImage(imgData *image.Image, numberOfColors *int, numberOfTopDisti
 	result.TopDistinctGray = getDistincts(result.Gray, *numberOfTopDistincts)
 	result.TopDistinctPink = getDistincts(result.Pink, *numberOfTopDistincts)
 
-	binary, _ := json.Marshal(result)
-	// todo handle json marshal error.
-	return string(binary)
+	// binary, _ := json.Marshal(result)
+	// // todo handle json marshal error.
+	// return string(binary)
+	return "{}"
 }
 
 /*
@@ -358,10 +360,12 @@ func getAccent(colors [][]ColorStruct, excludeCategories map[int]struct{}) Color
 	return secondary
 }
 
-func getSortedDict(category int, colorMap map[int]map[color.Color]ColorStruct) []ColorStruct {
-	sortedColor := make([]ColorStruct, 0, len((colorMap[category])))
-	for _, value := range colorMap[category] {
-		sortedColor = append(sortedColor, value)
+func getSortedDict(category int, colorMap map[color.Color]ColorStruct) []ColorStruct {
+	var sortedColor []ColorStruct
+	for _, value := range colorMap {
+		if value.category == category {
+			sortedColor = append(sortedColor, value)
+		}
 	}
 	sort.Slice(sortedColor, func(i, j int) bool {
 		return sortedColor[i].Count > sortedColor[j].Count
@@ -399,13 +403,13 @@ func ColorCategory(color color.RGBA) int {
 	return lowestCat
 }
 
-func findColorStruct(colr color.Color, colorMap map[int]map[color.Color]ColorStruct) (*ColorStruct, bool) {
-	for key := range colorMap {
-		colrStruct, present := colorMap[key][colr]
-		if present {
-			return &colrStruct, true
-		}
+func findColorStruct(colr color.Color, colorMap map[color.Color]ColorStruct) (*ColorStruct, bool) {
+	// for i := 0; i < 12; i++ {
+	colrStruct, present := colorMap[colr]
+	if present {
+		return &colrStruct, true
 	}
+	// }
 	return nil, false
 }
 
