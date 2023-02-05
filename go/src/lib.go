@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"image"
 	"image/color"
 	_ "image/jpeg"
@@ -292,10 +293,9 @@ func GetJsonForImage(imgData *image.Image, numberOfColors *int, numberOfTopDisti
 	result.TopDistinctGray = getDistincts(result.Gray, *numberOfTopDistincts)
 	result.TopDistinctPink = getDistincts(result.Pink, *numberOfTopDistincts)
 
-	// binary, _ := json.Marshal(result)
+	binary, _ := json.Marshal(result)
 	// // todo handle json marshal error.
-	// return string(binary)
-	return "{}"
+	return string(binary)
 }
 
 /*
