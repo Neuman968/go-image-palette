@@ -4,7 +4,7 @@ import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Container } from '@mui/system';
-import { CirclePicker, ColorResult, RGBColor, SwatchesPicker } from 'react-color';
+import { CirclePicker, ColorResult, RGBColor, SwatchesPicker, Color } from 'react-color';
 import axios from 'axios';
 import { ImagePalette, RGBAResult } from '../types/ImagePalette';
 import { AppBar, Grid, Palette, Theme } from '@mui/material';
@@ -77,7 +77,7 @@ type Props = {
     setImagePalette: (palette: ImagePalette) => void,
 }
 
-function ViewImagePalettePage(props: Props) {
+function ViewImagePalette(props: Props) {
 
     const [palette, setPalette] = React.useState<PaletteState | undefined>()
 
@@ -236,27 +236,5 @@ function ViewImagePalettePage(props: Props) {
     );
 }
 
-type ViewImageProps = {
-    file: File | undefined,
-    imagePalette: ImagePalette | undefined,
-    setImagePalette: (palette: ImagePalette) => void,
-}
+export default ViewImagePalette
 
-function ViewImagePalette(props: ViewImageProps) {
-    const navigate = useNavigate()
-
-    const shouldRedirect = !props.file || !props.imagePalette
-
-    if (shouldRedirect) {
-        navigate('/')
-    }
-
-    return !shouldRedirect
-        ? <React.Fragment>
-            <ToolDrawer/>
-            <ViewImagePalettePage file={props.file!!} imagePalette={props.imagePalette!!} setImagePalette={props.setImagePalette} />
-        </React.Fragment>
-        : <></>
-}
-
-export default ViewImagePalette;

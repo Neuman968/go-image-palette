@@ -2,11 +2,6 @@ import React from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-import { Container } from '@mui/system';
-import { CirclePicker, ColorResult, RGBColor, SwatchesPicker } from 'react-color';
-import axios from 'axios';
 import { ImagePalette, RGBAResult } from './types/ImagePalette';
 import { Grid, Palette, Typography } from '@mui/material';
 import Card from '@mui/material/Card';
@@ -16,15 +11,13 @@ import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import PaletteCard from './components/PaletteCard';
-import { PaletteState } from './types/Palette';
-import TopDistinctSwatches from './components/TopDistinctSwatches';
-import ViewImagePalette from './pages/ViewImagePalette';
 import { rgbResultToHex } from './utils/colorUtils';
 import { ReactComponent as Logo } from './assets/logo.svg'
 import UploadPhotoDisplay from './components/UploadPhotoDisplay';
 import { Routes, Route, redirect, useNavigate } from "react-router-dom";
 import { defaultPalette } from './types/DefaultPaletteOptions'
 import { useLoadedWasm } from './context/LoadedWasm';
+import ImagePaletteController from './pages/ImagePaletteController';
 type GoFns = {
   SayHi?: () => void,
 }
@@ -92,7 +85,7 @@ function App() {
       <Routes>
         <Route index element={<UploadPhotoDisplay setFile={setFileAndProcess} />} />
         <Route path="/examples" element={<></>} />
-        <Route path="/view" element={<ViewImagePalette file={file!!} imagePalette={imagePalette!!} setImagePalette={setImagePalette} />} />
+        <Route path="/view" element={<ImagePaletteController file={file!!} imagePalette={imagePalette!!} setImagePalette={setImagePalette} />} />
       </Routes>
   </ThemeProvider>
 }
