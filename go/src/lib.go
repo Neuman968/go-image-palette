@@ -133,7 +133,10 @@ var colorPoints = map[int][]color.RGBA{
 		color.RGBA{R: 122, G: 108, B: 131},
 		color.RGBA{R: 135, G: 119, B: 141},
 	},
-	black: {color.RGBA{R: 0, G: 0, B: 0}},
+	black: {
+		color.RGBA{R: 0, G: 0, B: 0},
+		color.RGBA{R: 26, G: 19, B: 17},
+	},
 	white: {color.RGBA{R: 255, G: 255, B: 255}},
 	brown: {
 		// color.RGBA{R: 98, G: 56, B: 16},    // brown
