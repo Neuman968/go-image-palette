@@ -141,6 +141,7 @@ function ViewImagePalette(props: Props) {
                         sx={{
                             height: 450,
                             objectFit: 'contain',
+                            width: '45%',
                         }}
                         component="img"
                         src={URL.createObjectURL(props.file)}

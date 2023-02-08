@@ -23,7 +23,7 @@ function ToolDrawer(props: Props) {
                 onChangeComplete={(colr, ev) => props.handleSketchPickerChange({ hex: colr.hex }, ev)}
                 color={props.color?.hex}
             />
-            <Typography>Color Count: {colorCount}</Typography>
+            <Typography>{colorCount} times in image</Typography>
         </Box>
     </Drawer>
 }

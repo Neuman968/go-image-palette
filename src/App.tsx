@@ -41,9 +41,9 @@ type GoWasmBinding = {
 
 function App() {
 
-  const [imagePalette, setImagePalette] = React.useState<ImagePalette | undefined>()
+  const [imagePalette, setImagePalette] = React.useState<ImagePalette>()
 
-  const [file, setFile] = React.useState<File | undefined>()
+  const [file, setFile] = React.useState<File>()
 
   const loadedWasm = useLoadedWasm<GoWasmBinding>()
 
