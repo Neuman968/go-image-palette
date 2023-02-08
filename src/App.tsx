@@ -58,12 +58,13 @@ function App() {
       if (resultJson) {
         console.log('Elapsed ', new Date().getTime() - now.getTime(), new Date())
         const iamgePaletteResp = JSON.parse(resultJson)
-        console.log('Logging response...')
-        console.log(imagePalette)
+        console.log('Logging response... Top Blue')
+        console.log(iamgePaletteResp?.Blue)
+        console.log('Logging Top Distinct Blue', iamgePaletteResp?.TopDistinctBlue)
         setImagePalette(iamgePaletteResp)
         navigate('/view')
       }
-      console.log('Result Json is ', resultJson)
+      // console.log('Result Json is ', resultJson)
     })
   }
 

@@ -27,10 +27,6 @@ export function WasmProvider (props: ProviderProps & React.PropsWithChildren) {
 }
 
 export function useLoadedWasm<T>(): T | undefined {
-
     const context = React.useContext(WasmContext)
-    // if (context === undefined) {
-    //     throw new Error("Must be used with Wasm.Provider")
-    // }
     return context ? context as unknown as T : undefined
 }

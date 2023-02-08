@@ -1,22 +1,30 @@
-import { Drawer } from '@mui/material'
+import { Drawer, Typography } from '@mui/material'
+import { Box, colorChannel } from '@mui/system'
 import React from 'react'
-import { SketchPicker, ColorResult, Color } from 'react-color'
+import { SketchPicker } from 'react-color'
+import { ColorItem } from '../types/ColorItem'
 
 type Props = {
-    handleSketchPickerChange: (color: ColorResult, event: React.ChangeEvent<HTMLInputElement>) => void,
-    color? : string 
+    handleSketchPickerChange: (color: ColorItem, event: React.ChangeEvent<HTMLInputElement>) => void,
+    color?: ColorItem,
+    colorCount: number | undefined
 }
 
 function ToolDrawer(props: Props) {
+    const colorCount = props.colorCount || 0
+
     return <Drawer
         anchor='right'
         open={true}
         variant='permanent'
     >
-        <SketchPicker
-            onChangeComplete={props.handleSketchPickerChange}
-            color={props.color}
-        />
+        <Box p={1}>
+            <SketchPicker
+                onChangeComplete={(colr, ev) => props.handleSketchPickerChange({ hex: colr.hex }, ev)}
+                color={props.color?.hex}
+            />
+            <Typography>Color Count: {colorCount}</Typography>
+        </Box>
     </Drawer>
 }
 
