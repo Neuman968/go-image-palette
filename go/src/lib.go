@@ -191,7 +191,7 @@ func GetIntPtr(val int) *int {
 	return &val
 }
 
-func GetJsonImageForBytes(imgByte []byte, numberOfColors *int, numberOfTopDistincts *int) string {
+func GetJsonImageForBytes(imgByte []byte, numberOfColors int, numberOfTopDistincts int) string {
 	img, _, err := image.Decode(bytes.NewReader(imgByte))
 	if err != nil {
 		log.Fatal(err)
@@ -199,7 +199,7 @@ func GetJsonImageForBytes(imgByte []byte, numberOfColors *int, numberOfTopDistin
 	return GetJsonForImage(&img, numberOfColors, numberOfTopDistincts)
 }
 
-func GetJsonForImage(imgData *image.Image, numberOfColors *int, numberOfTopDistincts *int) string {
+func GetJsonForImage(imgData *image.Image, numberOfColors int, numberOfTopDistincts int) string {
 
 	// var colorMap = make(map[int]map[color.Color]ColorStruct)
 
@@ -250,17 +250,17 @@ func GetJsonForImage(imgData *image.Image, numberOfColors *int, numberOfTopDisti
 	// fmt.Println(" Ending image processing.")
 	// fmt.Printf("There are %d entries in the map", len(colorMap))
 	result := &ResultColors{
-		Red:     getResultSlice(getSortedDict(red, colorMap), *numberOfColors),
-		Green:   getResultSlice(getSortedDict(green, colorMap), *numberOfColors),
-		Blue:    getResultSlice(getSortedDict(blue, colorMap), *numberOfColors),
-		Yellow:  getResultSlice(getSortedDict(yellow, colorMap), *numberOfColors),
-		Orange:  getResultSlice(getSortedDict(orange, colorMap), *numberOfColors),
-		Purple:  getResultSlice(getSortedDict(purple, colorMap), *numberOfColors),
-		Black:   getResultSlice(getSortedDict(black, colorMap), *numberOfColors),
-		White:   getResultSlice(getSortedDict(white, colorMap), *numberOfColors),
-		Brown:   getResultSlice(getSortedDict(brown, colorMap), *numberOfColors),
-		Gray:    getResultSlice(getSortedDict(gray, colorMap), *numberOfColors),
-		Pink:    getResultSlice(getSortedDict(pink, colorMap), *numberOfColors),
+		Red:     getResultSlice(getSortedDict(red, colorMap), numberOfColors),
+		Green:   getResultSlice(getSortedDict(green, colorMap), numberOfColors),
+		Blue:    getResultSlice(getSortedDict(blue, colorMap), numberOfColors),
+		Yellow:  getResultSlice(getSortedDict(yellow, colorMap), numberOfColors),
+		Orange:  getResultSlice(getSortedDict(orange, colorMap), numberOfColors),
+		Purple:  getResultSlice(getSortedDict(purple, colorMap), numberOfColors),
+		Black:   getResultSlice(getSortedDict(black, colorMap), numberOfColors),
+		White:   getResultSlice(getSortedDict(white, colorMap), numberOfColors),
+		Brown:   getResultSlice(getSortedDict(brown, colorMap), numberOfColors),
+		Gray:    getResultSlice(getSortedDict(gray, colorMap), numberOfColors),
+		Pink:    getResultSlice(getSortedDict(pink, colorMap), numberOfColors),
 		Primary: largest,
 	}
 
@@ -284,17 +284,17 @@ func GetJsonForImage(imgData *image.Image, numberOfColors *int, numberOfTopDisti
 		result.Orange, result.Purple, result.Pink,
 	}, map[int]struct{}{largest.category: {}, result.Secondary.category: {}, result.Tertiary.category: {}, result.Fourth.category: {}})
 
-	result.TopDistinctRed = getDistincts(result.Red, *numberOfTopDistincts)
-	result.TopDistinctGreen = getDistincts(result.Green, *numberOfTopDistincts)
-	result.TopDistinctBlue = getDistincts(result.Blue, *numberOfTopDistincts)
-	result.TopDistinctYellow = getDistincts(result.Yellow, *numberOfTopDistincts)
-	result.TopDistinctOrange = getDistincts(result.Orange, *numberOfTopDistincts)
-	result.TopDistinctPurple = getDistincts(result.Purple, *numberOfTopDistincts)
-	result.TopDistinctBlack = getDistincts(result.Black, *numberOfTopDistincts)
-	result.TopDistinctWhite = getDistincts(result.White, *numberOfTopDistincts)
-	result.TopDistinctBrown = getDistincts(result.Brown, *numberOfTopDistincts)
-	result.TopDistinctGray = getDistincts(result.Gray, *numberOfTopDistincts)
-	result.TopDistinctPink = getDistincts(result.Pink, *numberOfTopDistincts)
+	result.TopDistinctRed = getDistincts(result.Red, numberOfTopDistincts)
+	result.TopDistinctGreen = getDistincts(result.Green, numberOfTopDistincts)
+	result.TopDistinctBlue = getDistincts(result.Blue, numberOfTopDistincts)
+	result.TopDistinctYellow = getDistincts(result.Yellow, numberOfTopDistincts)
+	result.TopDistinctOrange = getDistincts(result.Orange, numberOfTopDistincts)
+	result.TopDistinctPurple = getDistincts(result.Purple, numberOfTopDistincts)
+	result.TopDistinctBlack = getDistincts(result.Black, numberOfTopDistincts)
+	result.TopDistinctWhite = getDistincts(result.White, numberOfTopDistincts)
+	result.TopDistinctBrown = getDistincts(result.Brown, numberOfTopDistincts)
+	result.TopDistinctGray = getDistincts(result.Gray, numberOfTopDistincts)
+	result.TopDistinctPink = getDistincts(result.Pink, numberOfTopDistincts)
 
 	binary, _ := json.Marshal(result)
 	// // todo handle json marshal error.

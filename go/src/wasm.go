@@ -9,11 +9,7 @@ func processImage(this js.Value, inputs []js.Value) interface{} {
 	byteArr := inputs[0]
 	inBuf := make([]uint8, byteArr.Get("byteLength").Int())
 	js.CopyBytesToGo(inBuf, byteArr)
-	return GetJsonImageForBytes(inBuf, GetIntPtr(200), GetIntPtr(15))
-	// start := time.Now()
-	// GetJsonImageForBytes(inBuf, GetIntPtr(200), GetIntPtr(15))
-	// duration := time.Since(start)
-	// return fmt.Sprintf("Duration: %d", duration)
+	return GetJsonImageForBytes(inBuf, 200, 15)
 }
 
 func sayHi(this js.Value, inputs []js.Value) interface{} {

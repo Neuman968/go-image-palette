@@ -41,10 +41,6 @@ func ProcessImage(r *http.Request, field string, maxSize int) (*image.Image, err
 	return &img, err
 }
 
-func getIntPtr(val int) *int {
-	return &val
-}
-
 func handleUpload(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.NotFound(w, r)
@@ -57,7 +53,7 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 		// todo handle err
 		log.Printf("Error!! %v", err)
 	} else {
-		json := GetJsonForImage(img, getIntPtr(200), getIntPtr(15))
+		json := GetJsonForImage(img, 200, 15)
 		io.WriteString(w, json)
 	}
 }
