@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router';
 import ToolDrawer from '../components/ToolDrawer';
 import ViewImagePalette from './ViewImagePalette';
 import { ColorItem } from '../types/ColorItem';
-import { rgbToHex } from '../utils/colorUtils';
+import { rgbToHex, rgbResultToHex } from '../utils/colorUtils';
 import { PaletteState } from '../types/Palette';
 
 type Props = {
@@ -108,6 +108,13 @@ function ImagePaletteController(props: Props) {
                 color={selectedColor}
                 colorCount={rgbCache.get(selectedColor?.hex)?.Count}
                 handleSketchPickerChange={setSelectedColor}
+                presetColors={[rgbResultToHex(palette.Primary), 
+                    rgbResultToHex(palette.Secondary),
+                    rgbResultToHex(palette.Tertiary),
+                    rgbResultToHex(palette.Tertiary),
+                    rgbResultToHex(palette.Fourth),
+                    rgbResultToHex(palette.Fifth),
+                ]}
             />
             <ViewImagePalette
                 file={props.file!!}

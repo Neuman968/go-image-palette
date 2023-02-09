@@ -7,7 +7,8 @@ import { ColorItem } from '../types/ColorItem'
 type Props = {
     handleSketchPickerChange: (color: ColorItem, event: React.ChangeEvent<HTMLInputElement>) => void,
     color?: ColorItem,
-    colorCount: number | undefined
+    colorCount: number | undefined,
+    presetColors: Array<string>,
 }
 
 function ToolDrawer(props: Props) {
@@ -22,6 +23,7 @@ function ToolDrawer(props: Props) {
             <SketchPicker
                 onChangeComplete={(colr, ev) => props.handleSketchPickerChange({ hex: colr.hex }, ev)}
                 color={props.color?.hex}
+                presetColors={props.presetColors}
             />
             <Typography>{colorCount} times in image</Typography>
         </Box>
