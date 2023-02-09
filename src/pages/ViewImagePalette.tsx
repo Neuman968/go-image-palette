@@ -122,7 +122,7 @@ function ViewImagePalette(props: Props) {
                             Object.keys(props.palette)
                                 .map((key: string) => key as keyof PaletteState)
                                 .map((key: keyof PaletteState) =>
-                                    <Grid item>
+                                    <Grid key={key} item>
                                         <PaletteCard
                                             onClick={() => paletteCardOnClick(key)}
                                             selected={selectedColor === key}
