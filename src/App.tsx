@@ -18,6 +18,7 @@ import { Routes, Route, redirect, useNavigate } from "react-router-dom";
 import { defaultPalette } from './types/DefaultPaletteOptions'
 import { useLoadedWasm } from './context/LoadedWasm';
 import ImagePaletteController from './pages/ImagePaletteController';
+import LoadingWheel from './components/LoadingWheel';
 type GoFns = {
   SayHi?: () => void,
 }
@@ -89,6 +90,7 @@ function App() {
         <Route path="/view" element={<ImagePaletteController file={file!!} imagePalette={imagePalette!!} setImagePalette={setImagePalette} />} />
       </Routes>
   </ThemeProvider>
+
 }
 
 export default App;

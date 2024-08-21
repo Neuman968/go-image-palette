@@ -201,20 +201,6 @@ func GetJsonImageForBytes(imgByte []byte, numberOfColors int, numberOfTopDistinc
 
 func GetJsonForImage(imgData *image.Image, numberOfColors int, numberOfTopDistincts int) string {
 
-	// var colorMap = make(map[int]map[color.Color]ColorStruct)
-
-	// colorMap[red] = make(map[color.Color]ColorStruct)
-	// colorMap[green] = make(map[color.Color]ColorStruct)
-	// colorMap[blue] = make(map[color.Color]ColorStruct)
-	// colorMap[yellow] = make(map[color.Color]ColorStruct)
-	// colorMap[orange] = make(map[color.Color]ColorStruct)
-	// colorMap[purple] = make(map[color.Color]ColorStruct)
-	// colorMap[black] = make(map[color.Color]ColorStruct)
-	// colorMap[white] = make(map[color.Color]ColorStruct)
-	// colorMap[brown] = make(map[color.Color]ColorStruct)
-	// colorMap[gray] = make(map[color.Color]ColorStruct)
-	// colorMap[pink] = make(map[color.Color]ColorStruct)
-
 	var largest ColorStruct
 
 	var colorMap = make(map[color.Color]ColorStruct)
