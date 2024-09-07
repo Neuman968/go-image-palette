@@ -19,7 +19,7 @@ const LIGHT_THRESHOLD = .40
 type ColorStruct struct {
 	color    color.Color
 	rgba     color.RGBA
-	category int
+	category string
 	R        uint8
 	G        uint8
 	B        uint8
@@ -78,13 +78,13 @@ type ResultColors struct {
 }
 
 // Points are used as coordinates to determine the color category.
-var colorPoints = map[int][]color.RGBA{
-	red: {
+var colorPoints = map[string][]color.RGBA{
+	Colors.Red: {
 		color.RGBA{R: 234, G: 50, B: 35}, // red
 		// color.RGBA{R: 127, G: 23, B: 14}, // dark red
 		// color.RGBA{R: 96, G: 16, B: 33},  // maroon
 	},
-	green: {
+	Colors.Green: {
 		color.RGBA{R: 77, G: 169, B: 58},   // green
 		color.RGBA{R: 166, G: 242, B: 139}, // light green
 		color.RGBA{R: 157, G: 246, B: 80},  // lime green
@@ -96,7 +96,7 @@ var colorPoints = map[int][]color.RGBA{
 		color.RGBA{R: 183, G: 247, B: 94},  // Lime
 		color.RGBA{R: 64, G: 71, B: 47},
 	},
-	blue: {
+	Colors.Blue: {
 		color.RGBA{R: 0, G: 30, B: 245},    // blue
 		color.RGBA{R: 156, G: 209, B: 248}, // light blue
 		color.RGBA{R: 63, G: 144, B: 134},  // teal
@@ -110,17 +110,17 @@ var colorPoints = map[int][]color.RGBA{
 		color.RGBA{R: 109, G: 147, B: 230},
 		color.RGBA{R: 161, G: 178, B: 214},
 	},
-	yellow: {
+	Colors.Yellow: {
 		color.RGBA{R: 255, G: 253, B: 84}, // yellow
 		color.RGBA{R: 204, G: 176, B: 59}, // mustard
 		color.RGBA{R: 249, G: 215, B: 73}, // gold
 	},
-	orange: {
+	Colors.Orange: {
 		color.RGBA{R: 255, G: 165, B: 0},  // orange
 		color.RGBA{R: 240, G: 145, B: 53}, // dark orange
 		color.RGBA{R: 235, G: 172, B: 108},
 	},
-	purple: {
+	Colors.Purple: {
 		color.RGBA{R: 177, G: 25, B: 124},  // purple
 		color.RGBA{R: 184, G: 131, B: 239}, // light purple
 		color.RGBA{R: 145, G: 65, B: 225},  // violet
@@ -132,24 +132,24 @@ var colorPoints = map[int][]color.RGBA{
 		color.RGBA{R: 122, G: 108, B: 131},
 		color.RGBA{R: 135, G: 119, B: 141},
 	},
-	black: {
+	Colors.Black: {
 		color.RGBA{R: 0, G: 0, B: 0},
 		color.RGBA{R: 26, G: 19, B: 17},
 	},
-	white: {color.RGBA{R: 255, G: 255, B: 255}},
-	brown: {
+	Colors.White: {color.RGBA{R: 255, G: 255, B: 255}},
+	Colors.Brown: {
 		// color.RGBA{R: 98, G: 56, B: 16},    // brown
 		color.RGBA{R: 206, G: 177, B: 120}, // tan
 		color.RGBA{R: 229, G: 217, B: 172}, // Beige
 		color.RGBA{R: 169, G: 129, B: 87},  // light brown
 	},
-	gray: {
+	Colors.Gray: {
 		// color.RGBA{R: 147, G: 149, B: 145},
 		color.RGBA{R: 128, G: 128, B: 128}, // dark gray
 		color.RGBA{R: 211, G: 211, B: 211}, // light gray
 		color.RGBA{R: 169, G: 169, B: 169}, // gray
 	},
-	pink: {
+	Colors.Pink: {
 		color.RGBA{R: 239, G: 139, B: 189}, // pink
 		color.RGBA{R: 169, G: 117, B: 129}, // Mauve
 		color.RGBA{R: 239, G: 128, B: 113}, // salmon
@@ -159,20 +159,36 @@ var colorPoints = map[int][]color.RGBA{
 	},
 }
 
-// color categories as defined by me.
-const (
-	red    int = 0
-	green      = 1
-	blue       = 2
-	black      = 3
-	white      = 4
-	gray       = 5
-	yellow     = 6
-	purple     = 8
-	orange     = 9
-	brown      = 10
-	pink       = 11
-)
+var Colors = newColorRegistry()
+
+func newColorRegistry() *colorRegistry {
+	return &colorRegistry{
+		Red:    "red",
+		Green:  "green",
+		Blue:   "blue",
+		White:  "white",
+		Gray:   "gray",
+		Yellow: "yellow",
+		Purple: "purple",
+		Orange: "orange",
+		Brown:  "brown",
+		Pink:   "pink",
+	}
+}
+
+type colorRegistry struct {
+	Red    string
+	Green  string
+	Blue   string
+	Black  string
+	White  string
+	Gray   string
+	Yellow string
+	Purple string
+	Orange string
+	Brown  string
+	Pink   string
+}
 
 func getImageFromFile(imgFileName *string) (*image.Image, error) {
 	imgFile, err := os.Open(*imgFileName)
@@ -184,10 +200,6 @@ func getImageFromFile(imgFileName *string) (*image.Image, error) {
 		return nil, err
 	}
 	return &imgData, nil
-}
-
-func GetIntPtr(val int) *int {
-	return &val
 }
 
 func GetJsonImageForBytes(imgByte []byte, numberOfColors int, numberOfTopDistincts int) string {
@@ -235,39 +247,39 @@ func GetJsonForImage(imgData *image.Image, numberOfColors int, numberOfTopDistin
 	// fmt.Println(" Ending image processing.")
 	// fmt.Printf("There are %d entries in the map", len(colorMap))
 	result := &ResultColors{
-		Red:     getResultSlice(getSortedDict(red, colorMap), numberOfColors),
-		Green:   getResultSlice(getSortedDict(green, colorMap), numberOfColors),
-		Blue:    getResultSlice(getSortedDict(blue, colorMap), numberOfColors),
-		Yellow:  getResultSlice(getSortedDict(yellow, colorMap), numberOfColors),
-		Orange:  getResultSlice(getSortedDict(orange, colorMap), numberOfColors),
-		Purple:  getResultSlice(getSortedDict(purple, colorMap), numberOfColors),
-		Black:   getResultSlice(getSortedDict(black, colorMap), numberOfColors),
-		White:   getResultSlice(getSortedDict(white, colorMap), numberOfColors),
-		Brown:   getResultSlice(getSortedDict(brown, colorMap), numberOfColors),
-		Gray:    getResultSlice(getSortedDict(gray, colorMap), numberOfColors),
-		Pink:    getResultSlice(getSortedDict(pink, colorMap), numberOfColors),
+		Red:     getResultSlice(getSortedDict(Colors.Red, colorMap), numberOfColors),
+		Green:   getResultSlice(getSortedDict(Colors.Green, colorMap), numberOfColors),
+		Blue:    getResultSlice(getSortedDict(Colors.Blue, colorMap), numberOfColors),
+		Yellow:  getResultSlice(getSortedDict(Colors.Yellow, colorMap), numberOfColors),
+		Orange:  getResultSlice(getSortedDict(Colors.Orange, colorMap), numberOfColors),
+		Purple:  getResultSlice(getSortedDict(Colors.Purple, colorMap), numberOfColors),
+		Black:   getResultSlice(getSortedDict(Colors.Black, colorMap), numberOfColors),
+		White:   getResultSlice(getSortedDict(Colors.White, colorMap), numberOfColors),
+		Brown:   getResultSlice(getSortedDict(Colors.Brown, colorMap), numberOfColors),
+		Gray:    getResultSlice(getSortedDict(Colors.Gray, colorMap), numberOfColors),
+		Pink:    getResultSlice(getSortedDict(Colors.Pink, colorMap), numberOfColors),
 		Primary: largest,
 	}
 
 	result.Secondary = getAccent([][]ColorStruct{
 		result.Red, result.Green, result.Blue, result.Yellow,
 		result.Orange, result.Purple, result.Pink,
-	}, map[int]struct{}{largest.category: {}})
+	}, map[string]struct{}{largest.category: {}})
 
 	result.Tertiary = getAccent([][]ColorStruct{
 		result.Red, result.Green, result.Blue, result.Yellow,
 		result.Orange, result.Purple, result.Pink,
-	}, map[int]struct{}{largest.category: {}, result.Secondary.category: {}})
+	}, map[string]struct{}{largest.category: {}, result.Secondary.category: {}})
 
 	result.Fourth = getAccent([][]ColorStruct{
 		result.Red, result.Green, result.Blue, result.Yellow,
 		result.Orange, result.Purple, result.Pink,
-	}, map[int]struct{}{largest.category: {}, result.Secondary.category: {}, result.Tertiary.category: {}})
+	}, map[string]struct{}{largest.category: {}, result.Secondary.category: {}, result.Tertiary.category: {}})
 
 	result.Fifth = getAccent([][]ColorStruct{
 		result.Red, result.Green, result.Blue, result.Yellow,
 		result.Orange, result.Purple, result.Pink,
-	}, map[int]struct{}{largest.category: {}, result.Secondary.category: {}, result.Tertiary.category: {}, result.Fourth.category: {}})
+	}, map[string]struct{}{largest.category: {}, result.Secondary.category: {}, result.Tertiary.category: {}, result.Fourth.category: {}})
 
 	result.TopDistinctRed = getDistincts(result.Red, numberOfTopDistincts)
 	result.TopDistinctGreen = getDistincts(result.Green, numberOfTopDistincts)
@@ -333,7 +345,7 @@ func getDistincts(colors []ColorStruct, numberOfDistcts int) []ColorStruct {
 	return returnArr
 }
 
-func getAccent(colors [][]ColorStruct, excludeCategories map[int]struct{}) ColorStruct {
+func getAccent(colors [][]ColorStruct, excludeCategories map[string]struct{}) ColorStruct {
 	var secondary ColorStruct
 	for _, colorArr := range colors {
 		if len(colorArr) > 0 {
@@ -348,7 +360,7 @@ func getAccent(colors [][]ColorStruct, excludeCategories map[int]struct{}) Color
 	return secondary
 }
 
-func getSortedDict(category int, colorMap map[color.Color]ColorStruct) []ColorStruct {
+func getSortedDict(category string, colorMap map[color.Color]ColorStruct) []ColorStruct {
 	var sortedColor []ColorStruct
 	for _, value := range colorMap {
 		if value.category == category {
@@ -376,9 +388,10 @@ func toColorStruct(colorVal color.Color) ColorStruct {
 	return *colorStruct
 }
 
-func ColorCategory(color color.RGBA) int {
-	var lowestCat = red
+func ColorCategory(color color.RGBA) string {
+	var lowestCat = Colors.Red
 	var shortestDistance = float64(-1)
+
 	for key, value := range colorPoints {
 		for _, subColor := range value {
 			dist := getRgbDistance(subColor, color)
@@ -401,6 +414,8 @@ func findColorStruct(colr color.Color, colorMap map[color.Color]ColorStruct) (*C
 	return nil, false
 }
 
+// Calculate the distance between two colors as if they were points in a 3D space.
 func getRgbDistance(rgb1, rgb2 color.RGBA) float64 {
-	return math.Sqrt(math.Pow(float64(rgb2.R)-float64(rgb1.R), 2) + math.Pow(float64(rgb2.G)-float64(rgb1.G), 2) + math.Pow(float64(rgb2.B)-float64(rgb1.B), 2))
+	return math.Sqrt(math.Pow(float64(rgb2.R)-float64(rgb1.R), 2) +
+		math.Pow(float64(rgb2.G)-float64(rgb1.G), 2) + math.Pow(float64(rgb2.B)-float64(rgb1.B), 2))
 }

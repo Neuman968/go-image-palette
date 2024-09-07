@@ -10,8 +10,17 @@ func Test_ColorCategory_ExpectingPurpleReturned(t *testing.T) {
 	rgba := color.RGBA{R: 108, G: 97, B: 120}
 	result := ColorCategory(rgba)
 	// category
-	if result != 8 {
-		t.Errorf("Output is not equal to pink, was %d", result)
+	if result != Colors.Purple {
+		t.Errorf("Output is not equal to purple, was %s", result)
+	}
+}
+
+func Test_ColorCategory_ExpectingGrayReturned(t *testing.T) {
+	rgba := color.RGBA{R: 178, G: 199, B: 178}
+	result := ColorCategory(rgba)
+	// category
+	if result != Colors.Gray {
+		t.Errorf("Output is not equal to Gray, was %s", result)
 	}
 }
 
@@ -19,8 +28,8 @@ func Test_ColorCategory_ExpectingBlackReturned(t *testing.T) {
 	rgba := color.RGBA{R: 0, G: 0, B: 0}
 	result := ColorCategory(rgba)
 	// category
-	if result != 3 {
-		t.Errorf("Output is not equal to pink, was %d", result)
+	if result != Colors.Black {
+		t.Errorf("Output is not equal to pink, was %s", result)
 	}
 }
 
