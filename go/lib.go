@@ -16,7 +16,6 @@ import (
 const LIGHT_THRESHOLD = .40
 
 // Contains a reference to the RGBA image content as well as the number of times it occurs.
-//
 type ColorStruct struct {
 	color    color.Color
 	rgba     color.RGBA
@@ -78,7 +77,7 @@ type ResultColors struct {
 	Fifth ColorStruct
 }
 
-// Display native values..
+// Points are used as coordinates to determine the color category.
 var colorPoints = map[int][]color.RGBA{
 	red: {
 		color.RGBA{R: 234, G: 50, B: 35}, // red
