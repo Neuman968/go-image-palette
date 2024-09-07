@@ -15,6 +15,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	} else {
-		fmt.Print(GetJsonForImage(imgData, numberOfColors, numberOfTopDistincts))
+		fmt.Print(GetJsonForImage(imgData, *numberOfColors, *numberOfTopDistincts))
 	}
 }
