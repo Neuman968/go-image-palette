@@ -1,4 +1,4 @@
-package main
+package palettelib 
 
 import (
 	"bytes"
@@ -190,7 +190,7 @@ type colorRegistry struct {
 	Pink   string
 }
 
-func getImageFromFile(imgFileName *string) (*image.Image, error) {
+func GetImageFromFile(imgFileName *string) (*image.Image, error) {
 	imgFile, err := os.Open(*imgFileName)
 	if err != nil {
 		return nil, err
