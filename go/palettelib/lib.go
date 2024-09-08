@@ -260,7 +260,7 @@ func GetJsonForImage(imgData *image.Image, numberOfColors int, numberOfTopDistin
 			if (ColorStruct{} == largest ||
 				(largest.Count < count &&
 					getLightness(colorStruct.rgba) > LIGHT_THRESHOLD) &&
-					colorStruct.isWhite()) {
+					!colorStruct.isWhite()) {
 				largest = colorStruct
 			}
 
@@ -350,8 +350,6 @@ func getDistincts(colors []ColorStruct, numberOfDistcts int) []ColorStruct {
 			if i < len(cachedArr) {
 				returnArr[i] = cachedArr[i].colorStruct
 			}
-			// fmt.Println("Printing returned color struct... ")
-			// fmt.Printf("RGB %d %d %d Distance %f", cachedArr[i].colorStruct.rgba.R, cachedArr[i].colorStruct.rgba.G, cachedArr[i].colorStruct.rgba.B, cachedArr[i].distance)
 		}
 	}
 	return returnArr
@@ -375,21 +373,6 @@ func getAccent(previousColorStruct ColorStruct,
 
 	return secondary
 }
-
-// func getAccent(colors [][]ColorStruct, excludeCategories map[string]struct{}) ColorStruct {
-// 	var secondary ColorStruct
-// 	for _, colorArr := range colors {
-// 		if len(colorArr) > 0 {
-// 			_, isCategory := excludeCategories[colorArr[0].category]
-// 			if (ColorStruct{} == secondary ||
-// 				(!isCategory && colorArr[0].Count > secondary.Count && getLightness(secondary.rgba) > LIGHT_THRESHOLD)) {
-// 				secondary = colorArr[0]
-// 			}
-// 		}
-// 	}
-
-// 	return secondary
-// }
 
 func getSortedDict(category string, colorMap map[color.Color]ColorStruct) []ColorStruct {
 	var sortedColor []ColorStruct
