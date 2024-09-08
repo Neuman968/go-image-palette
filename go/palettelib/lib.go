@@ -245,10 +245,10 @@ func GetJsonForImage(imgData *image.Image, numberOfColors int, numberOfTopDistin
 
 	averageColorDistance := getAverageColorDistance(colorMap)
 
-	result.Secondary = getAccent(*largest, averageColorDistance, colorMap)
-	result.Tertiary = getAccent(result.Secondary, averageColorDistance, colorMap)
-	result.Fourth = getAccent(result.Tertiary, averageColorDistance, colorMap)
-	result.Fifth = getAccent(result.Fourth, averageColorDistance, colorMap)
+	result.Secondary = getAccent([]ColorStruct{*largest}, averageColorDistance, colorMap)
+	result.Tertiary = getAccent([]ColorStruct{*largest, result.Secondary}, averageColorDistance, colorMap)
+	result.Fourth = getAccent([]ColorStruct{*largest, result.Secondary, result.Tertiary}, averageColorDistance, colorMap)
+	result.Fifth = getAccent([]ColorStruct{*largest, result.Secondary, result.Tertiary, result.Fourth}, averageColorDistance, colorMap)
 
 	binary, _ := json.Marshal(result)
 	// // todo handle json marshal error.
@@ -274,24 +274,40 @@ func getLightness(rgba color.RGBA) float64 {
 	return (0.5 * (max + min)) / 255
 }
 
-func getAccent(previousColorStruct ColorStruct,
+func getAccent(previousColors []ColorStruct,
 	averageDistance float64,
 	colorMap *map[color.Color]ColorStruct) ColorStruct {
 	var secondary ColorStruct
 	for _, value := range *colorMap {
 		if value.Count > secondary.Count &&
-			value.Count < previousColorStruct.Count &&
-			getRgbDistance(value.rgba, previousColorStruct.rgba) > averageDistance {
+			isAverageDistanceFromAllColors(value, &previousColors, averageDistance) {
 			secondary = value
 		}
 	}
 
-	if (secondary == ColorStruct{}) {
-		secondary = previousColorStruct
+	if (secondary == ColorStruct{} && len(previousColors) > 0) {
+		secondary = previousColors[0]
 	}
 
 	return secondary
 }
+
+func isAverageDistanceFromAllColors(color ColorStruct, previousColors *[]ColorStruct, averageDistance float64) bool {
+	for _, value := range *previousColors {
+		if getRgbDistance(value.rgba, color.rgba) <= averageDistance {
+			return false
+		}
+	}
+	return true
+}
+
+// func getAverageDistanceFromPrevious(color ColorStruct, previousColors *[]ColorStruct) float64 {
+// 	var total float64
+// 	for _, value := range *previousColors {
+// 		total += getRgbDistance(value.rgba, color.rgba)
+// 	}
+// 	return total / float64(len(*previousColors))
+// }
 
 func getSortedDict(category string, colorMap map[color.Color]ColorStruct) []ColorStruct {
 	var sortedColor []ColorStruct
