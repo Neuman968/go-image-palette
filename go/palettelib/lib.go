@@ -37,39 +37,6 @@ type ColorStructAndDist struct {
 }
 
 type ResultColors struct {
-	Red            []ColorStruct
-	TopDistinctRed []ColorStruct
-
-	Green            []ColorStruct
-	TopDistinctGreen []ColorStruct
-
-	Blue            []ColorStruct
-	TopDistinctBlue []ColorStruct
-
-	Yellow            []ColorStruct
-	TopDistinctYellow []ColorStruct
-
-	Orange            []ColorStruct
-	TopDistinctOrange []ColorStruct
-
-	Purple            []ColorStruct
-	TopDistinctPurple []ColorStruct
-
-	Black            []ColorStruct
-	TopDistinctBlack []ColorStruct
-
-	White            []ColorStruct
-	TopDistinctWhite []ColorStruct
-
-	Brown            []ColorStruct
-	TopDistinctBrown []ColorStruct
-
-	Gray            []ColorStruct
-	TopDistinctGray []ColorStruct
-
-	Pink            []ColorStruct
-	TopDistinctPink []ColorStruct
-
 	Primary ColorStruct
 
 	Secondary ColorStruct
@@ -79,6 +46,8 @@ type ResultColors struct {
 	Fourth ColorStruct
 
 	Fifth ColorStruct
+
+	TopColors []ColorStruct
 }
 
 // Points are used as coordinates to determine the color category.
@@ -167,31 +136,33 @@ var Colors = newColorRegistry()
 
 func newColorRegistry() *colorRegistry {
 	return &colorRegistry{
-		Red:    "red",
-		Green:  "green",
-		Blue:   "blue",
-		White:  "white",
-		Gray:   "gray",
-		Yellow: "yellow",
-		Purple: "purple",
-		Orange: "orange",
-		Brown:  "brown",
-		Pink:   "pink",
+		Red:     "red",
+		Green:   "green",
+		Blue:    "blue",
+		White:   "white",
+		Gray:    "gray",
+		Yellow:  "yellow",
+		Purple:  "purple",
+		Orange:  "orange",
+		Brown:   "brown",
+		Pink:    "pink",
+		Unknown: "unknown",
 	}
 }
 
 type colorRegistry struct {
-	Red    string
-	Green  string
-	Blue   string
-	Black  string
-	White  string
-	Gray   string
-	Yellow string
-	Purple string
-	Orange string
-	Brown  string
-	Pink   string
+	Red     string
+	Green   string
+	Blue    string
+	Black   string
+	White   string
+	Gray    string
+	Yellow  string
+	Purple  string
+	Orange  string
+	Brown   string
+	Pink    string
+	Unknown string
 }
 
 func GetImageFromFile(imgFileName *string) (*image.Image, error) {
@@ -232,7 +203,7 @@ func getAverageColorDistance(colorMap *map[color.Color]ColorStruct) float64 {
 	return total / count
 }
 
-func getColorMap(imgData *image.Image) (map[color.Color]ColorStruct, ColorStruct) {
+func getColorMap(imgData *image.Image) (*map[color.Color]ColorStruct, *ColorStruct) {
 
 	var largest ColorStruct
 
@@ -245,71 +216,42 @@ func getColorMap(imgData *image.Image) (map[color.Color]ColorStruct, ColorStruct
 			colorStruct := toColorStruct(colr)
 			value, present := colorMap[colr]
 			count := 1
+			colorStruct.rgba = color.RGBAModel.Convert(colr).(color.RGBA)
 			if present {
 				count = value.Count + 1
 				colorStruct.category = value.category
 			} else {
 				colorStruct.category = ColorCategory(colorStruct.rgba)
-				colorStruct.rgba = color.RGBAModel.Convert(colr).(color.RGBA)
 			}
 			colorStruct.Count = count
 			colorStruct.R = colorStruct.rgba.R
 			colorStruct.G = colorStruct.rgba.G
 			colorStruct.B = colorStruct.rgba.B
 			colorStruct.A = colorStruct.rgba.A
-			if (ColorStruct{} == largest ||
-				(largest.Count < count &&
-					getLightness(colorStruct.rgba) > LIGHT_THRESHOLD) &&
-					!colorStruct.isWhite()) {
+			if count > largest.Count && !colorStruct.isWhite() {
 				largest = colorStruct
 			}
 
 			colorMap[colr] = colorStruct
 		}
 	}
-	return colorMap, largest
+	return &colorMap, &largest
 }
 
 func GetJsonForImage(imgData *image.Image, numberOfColors int, numberOfTopDistincts int) string {
 
 	colorMap, largest := getColorMap(imgData)
-	// end := time.Since(start)
-	// fmt.Printf("Conversion took %s", end)
-	// fmt.Println(" Ending image processing.")
-	// fmt.Printf("There are %d entries in the map", len(colorMap))
+
 	result := &ResultColors{
-		Red:     getResultSlice(getSortedDict(Colors.Red, colorMap), numberOfColors),
-		Green:   getResultSlice(getSortedDict(Colors.Green, colorMap), numberOfColors),
-		Blue:    getResultSlice(getSortedDict(Colors.Blue, colorMap), numberOfColors),
-		Yellow:  getResultSlice(getSortedDict(Colors.Yellow, colorMap), numberOfColors),
-		Orange:  getResultSlice(getSortedDict(Colors.Orange, colorMap), numberOfColors),
-		Purple:  getResultSlice(getSortedDict(Colors.Purple, colorMap), numberOfColors),
-		Black:   getResultSlice(getSortedDict(Colors.Black, colorMap), numberOfColors),
-		White:   getResultSlice(getSortedDict(Colors.White, colorMap), numberOfColors),
-		Brown:   getResultSlice(getSortedDict(Colors.Brown, colorMap), numberOfColors),
-		Gray:    getResultSlice(getSortedDict(Colors.Gray, colorMap), numberOfColors),
-		Pink:    getResultSlice(getSortedDict(Colors.Pink, colorMap), numberOfColors),
-		Primary: largest,
+		Primary: *largest,
 	}
 
-	averageColorDistance := getAverageColorDistance(&colorMap)
+	averageColorDistance := getAverageColorDistance(colorMap)
 
-	result.Secondary = getAccent(largest, averageColorDistance, &colorMap)
-	result.Tertiary = getAccent(result.Secondary, averageColorDistance, &colorMap)
-	result.Fourth = getAccent(result.Tertiary, averageColorDistance, &colorMap)
-	result.Fifth = getAccent(result.Fourth, averageColorDistance, &colorMap)
-
-	result.TopDistinctRed = getDistincts(result.Red, numberOfTopDistincts)
-	result.TopDistinctGreen = getDistincts(result.Green, numberOfTopDistincts)
-	result.TopDistinctBlue = getDistincts(result.Blue, numberOfTopDistincts)
-	result.TopDistinctYellow = getDistincts(result.Yellow, numberOfTopDistincts)
-	result.TopDistinctOrange = getDistincts(result.Orange, numberOfTopDistincts)
-	result.TopDistinctPurple = getDistincts(result.Purple, numberOfTopDistincts)
-	result.TopDistinctBlack = getDistincts(result.Black, numberOfTopDistincts)
-	result.TopDistinctWhite = getDistincts(result.White, numberOfTopDistincts)
-	result.TopDistinctBrown = getDistincts(result.Brown, numberOfTopDistincts)
-	result.TopDistinctGray = getDistincts(result.Gray, numberOfTopDistincts)
-	result.TopDistinctPink = getDistincts(result.Pink, numberOfTopDistincts)
+	result.Secondary = getAccent(*largest, averageColorDistance, colorMap)
+	result.Tertiary = getAccent(result.Secondary, averageColorDistance, colorMap)
+	result.Fourth = getAccent(result.Tertiary, averageColorDistance, colorMap)
+	result.Fifth = getAccent(result.Fourth, averageColorDistance, colorMap)
 
 	binary, _ := json.Marshal(result)
 	// // todo handle json marshal error.
@@ -333,32 +275,6 @@ func getLightness(rgba color.RGBA) float64 {
 	max := math.Max(float64(rgba.R), math.Max(float64(rgba.G), float64(rgba.B)))
 	min := math.Min(float64(rgba.R), math.Min(float64(rgba.G), float64(rgba.B)))
 	return (0.5 * (max + min)) / 255
-}
-
-func getDistincts(colors []ColorStruct, numberOfDistcts int) []ColorStruct {
-	// fmt.Printf("Analyzing %d colors", len(colors))
-	returnArr := make([]ColorStruct, numberOfDistcts)
-	cachedArr := make([]ColorStructAndDist, len(colors))
-	if len(colors) > 0 {
-		topColor := colors[0]
-		for i := 1; i < len(colors); i++ {
-			distance := getRgbDistance(topColor.rgba, colors[i].rgba)
-			cachedArr[i-1] = ColorStructAndDist{
-				distance:    distance,
-				colorStruct: colors[i],
-			}
-		}
-		sort.Slice(cachedArr, func(i, j int) bool {
-			return cachedArr[i].distance > cachedArr[j].distance
-		})
-		returnArr[0] = topColor
-		for i := 1; i < numberOfDistcts; i++ {
-			if i < len(cachedArr) {
-				returnArr[i] = cachedArr[i].colorStruct
-			}
-		}
-	}
-	return returnArr
 }
 
 func getAccent(previousColorStruct ColorStruct,
