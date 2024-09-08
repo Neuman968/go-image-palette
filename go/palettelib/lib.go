@@ -27,6 +27,10 @@ type ColorStruct struct {
 	Count    int
 }
 
+func (s ColorStruct) isWhite() bool {
+	return s.R == 255 && s.G == 255 && s.B == 255
+}
+
 type ColorStructAndDist struct {
 	colorStruct ColorStruct
 	distance    float64
@@ -210,6 +214,24 @@ func GetJsonImageForBytes(imgByte []byte, numberOfColors int, numberOfTopDistinc
 	return GetJsonForImage(&img, numberOfColors, numberOfTopDistincts)
 }
 
+// Calculates the average distance between unique colors in the image.
+func getAverageColorDistance(colorMap *map[color.Color]ColorStruct) float64 {
+	var total float64
+	var count float64
+
+	var prev color.Color
+
+	for key := range *colorMap {
+		if prev != nil {
+			total += getRgbDistance(color.RGBAModel.Convert(key).(color.RGBA), color.RGBAModel.Convert(prev).(color.RGBA))
+			count++
+		}
+		prev = key
+	}
+
+	return total / count
+}
+
 func GetJsonForImage(imgData *image.Image, numberOfColors int, numberOfTopDistincts int) string {
 
 	var largest ColorStruct
@@ -235,7 +257,10 @@ func GetJsonForImage(imgData *image.Image, numberOfColors int, numberOfTopDistin
 			colorStruct.G = colorStruct.rgba.G
 			colorStruct.B = colorStruct.rgba.B
 			colorStruct.A = colorStruct.rgba.A
-			if (ColorStruct{} == largest || (largest.Count < count && getLightness(colorStruct.rgba) > LIGHT_THRESHOLD)) {
+			if (ColorStruct{} == largest ||
+				(largest.Count < count &&
+					getLightness(colorStruct.rgba) > LIGHT_THRESHOLD) &&
+					colorStruct.isWhite()) {
 				largest = colorStruct
 			}
 
@@ -261,25 +286,12 @@ func GetJsonForImage(imgData *image.Image, numberOfColors int, numberOfTopDistin
 		Primary: largest,
 	}
 
-	result.Secondary = getAccent([][]ColorStruct{
-		result.Red, result.Green, result.Blue, result.Yellow,
-		result.Orange, result.Purple, result.Pink,
-	}, map[string]struct{}{largest.category: {}})
+	averageColorDistance := getAverageColorDistance(&colorMap)
 
-	result.Tertiary = getAccent([][]ColorStruct{
-		result.Red, result.Green, result.Blue, result.Yellow,
-		result.Orange, result.Purple, result.Pink,
-	}, map[string]struct{}{largest.category: {}, result.Secondary.category: {}})
-
-	result.Fourth = getAccent([][]ColorStruct{
-		result.Red, result.Green, result.Blue, result.Yellow,
-		result.Orange, result.Purple, result.Pink,
-	}, map[string]struct{}{largest.category: {}, result.Secondary.category: {}, result.Tertiary.category: {}})
-
-	result.Fifth = getAccent([][]ColorStruct{
-		result.Red, result.Green, result.Blue, result.Yellow,
-		result.Orange, result.Purple, result.Pink,
-	}, map[string]struct{}{largest.category: {}, result.Secondary.category: {}, result.Tertiary.category: {}, result.Fourth.category: {}})
+	result.Secondary = getAccent(largest, averageColorDistance, &colorMap)
+	result.Tertiary = getAccent(result.Secondary, averageColorDistance, &colorMap)
+	result.Fourth = getAccent(result.Tertiary, averageColorDistance, &colorMap)
+	result.Fifth = getAccent(result.Fourth, averageColorDistance, &colorMap)
 
 	result.TopDistinctRed = getDistincts(result.Red, numberOfTopDistincts)
 	result.TopDistinctGreen = getDistincts(result.Green, numberOfTopDistincts)
@@ -345,20 +357,39 @@ func getDistincts(colors []ColorStruct, numberOfDistcts int) []ColorStruct {
 	return returnArr
 }
 
-func getAccent(colors [][]ColorStruct, excludeCategories map[string]struct{}) ColorStruct {
+func getAccent(previousColorStruct ColorStruct,
+	averageDistance float64,
+	colorMap *map[color.Color]ColorStruct) ColorStruct {
 	var secondary ColorStruct
-	for _, colorArr := range colors {
-		if len(colorArr) > 0 {
-			_, isCategory := excludeCategories[colorArr[0].category]
-			if (ColorStruct{} == secondary ||
-				(!isCategory && colorArr[0].Count > secondary.Count && getLightness(secondary.rgba) > LIGHT_THRESHOLD)) {
-				secondary = colorArr[0]
-			}
+	for _, value := range *colorMap {
+		if value.Count > secondary.Count &&
+			value.Count < previousColorStruct.Count &&
+			getRgbDistance(value.rgba, previousColorStruct.rgba) > averageDistance {
+			secondary = value
 		}
+	}
+
+	if (secondary == ColorStruct{}) {
+		secondary = previousColorStruct
 	}
 
 	return secondary
 }
+
+// func getAccent(colors [][]ColorStruct, excludeCategories map[string]struct{}) ColorStruct {
+// 	var secondary ColorStruct
+// 	for _, colorArr := range colors {
+// 		if len(colorArr) > 0 {
+// 			_, isCategory := excludeCategories[colorArr[0].category]
+// 			if (ColorStruct{} == secondary ||
+// 				(!isCategory && colorArr[0].Count > secondary.Count && getLightness(secondary.rgba) > LIGHT_THRESHOLD)) {
+// 				secondary = colorArr[0]
+// 			}
+// 		}
+// 	}
+
+// 	return secondary
+// }
 
 func getSortedDict(category string, colorMap map[color.Color]ColorStruct) []ColorStruct {
 	var sortedColor []ColorStruct
