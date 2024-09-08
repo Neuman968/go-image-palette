@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Neuman968/web-image-palette/colorlib"
+	"github.com/Neuman968/web-image-palette/palettelib"
 )
 
 func main() {
@@ -13,10 +13,10 @@ func main() {
 	var numberOfColors = flag.Int("n", 10, "-n <number-of-colors>")
 	var numberOfTopDistincts = flag.Int("d", 3, "-d <distinct-colors>")
 	flag.Parse()
-	imgData, err := colorlib.GetImageFromFile(imgFileName)
+	imgData, err := palettelib.GetImageFromFile(imgFileName)
 	if err != nil {
 		log.Fatal(err)
 	} else {
-		fmt.Print(colorlib.GetJsonForImage(imgData, *numberOfColors, *numberOfTopDistincts))
+		fmt.Print(palettelib.GetJsonForImage(imgData, *numberOfColors, *numberOfTopDistincts))
 	}
 }
