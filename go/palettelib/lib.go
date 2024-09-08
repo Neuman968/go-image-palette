@@ -216,18 +216,19 @@ func getColorMap(imgData *image.Image) (*map[color.Color]ColorStruct, *ColorStru
 			colorStruct := toColorStruct(colr)
 			value, present := colorMap[colr]
 			count := 1
-			colorStruct.rgba = color.RGBAModel.Convert(colr).(color.RGBA)
 			if present {
+				colorStruct = value
 				count = value.Count + 1
 				colorStruct.category = value.category
 			} else {
 				colorStruct.category = ColorCategory(colorStruct.rgba)
+				colorStruct.rgba = color.RGBAModel.Convert(colr).(color.RGBA)
+				colorStruct.R = colorStruct.rgba.R
+				colorStruct.G = colorStruct.rgba.G
+				colorStruct.B = colorStruct.rgba.B
+				colorStruct.A = colorStruct.rgba.A
 			}
 			colorStruct.Count = count
-			colorStruct.R = colorStruct.rgba.R
-			colorStruct.G = colorStruct.rgba.G
-			colorStruct.B = colorStruct.rgba.B
-			colorStruct.A = colorStruct.rgba.A
 			if count > largest.Count && !colorStruct.isWhite() {
 				largest = colorStruct
 			}
