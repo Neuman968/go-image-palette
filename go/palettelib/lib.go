@@ -10,7 +10,6 @@ import (
 	"log"
 	"math"
 	"os"
-	"sort"
 )
 
 const LIGHT_THRESHOLD = .40
@@ -217,13 +216,10 @@ func getColorMap(imgData *image.Image) (*map[color.Color]ColorStruct, *ColorStru
 			if present {
 				colorStruct.Count = colorStruct.Count + 1
 			} else {
-				colorStruct = toColorStruct(colr)
-				colorStruct.category = ColorCategory(colorStruct.rgba)
-				colorStruct.rgba = color.RGBAModel.Convert(colr).(color.RGBA)
-				colorStruct.R = colorStruct.rgba.R
-				colorStruct.G = colorStruct.rgba.G
-				colorStruct.B = colorStruct.rgba.B
-				colorStruct.A = colorStruct.rgba.A
+				colorStruct = newColorStruct(colr)
+				// TODO categorizing colors is costly, move to a different process.
+				// colorStruct.category = ColorCategory(colorStruct.rgba)
+
 			}
 			if colorStruct.Count > largest.Count && !colorStruct.isWhite() {
 				largest = colorStruct
@@ -309,32 +305,34 @@ func isAverageDistanceFromAllColors(color ColorStruct, previousColors *[]ColorSt
 // 	return total / float64(len(*previousColors))
 // }
 
-func getSortedDict(category string, colorMap map[color.Color]ColorStruct) []ColorStruct {
-	var sortedColor []ColorStruct
-	for _, value := range colorMap {
-		if value.category == category {
-			sortedColor = append(sortedColor, value)
-		}
-	}
-	sort.Slice(sortedColor, func(i, j int) bool {
-		return sortedColor[i].Count > sortedColor[j].Count
-	})
-	return sortedColor
-}
+// func getSortedDict(category string, colorMap map[color.Color]ColorStruct) []ColorStruct {
+// 	var sortedColor []ColorStruct
+// 	for _, value := range colorMap {
+// 		if value.category == category {
+// 			sortedColor = append(sortedColor, value)
+// 		}
+// 	}
+// 	sort.Slice(sortedColor, func(i, j int) bool {
+// 		return sortedColor[i].Count > sortedColor[j].Count
+// 	})
+// 	return sortedColor
+// }
 
-func getResultSlice(colors []ColorStruct, size int) []ColorStruct {
-	safeLength := size
-	if len(colors) < size {
-		safeLength = len(colors)
-	}
-	return colors[0:safeLength]
-}
 
-func toColorStruct(colorVal color.Color) ColorStruct {
-	colorStruct := new(ColorStruct)
+
+func newColorStruct(colorVal color.Color) ColorStruct {
+	colorStruct := ColorStruct{}
 	colorStruct.color = colorVal
 	colorStruct.Count = 0
-	return *colorStruct
+	colorStruct.category = Colors.Unknown
+
+	colorStruct.rgba = color.RGBAModel.Convert(colorVal).(color.RGBA)
+	colorStruct.R = colorStruct.rgba.R
+	colorStruct.G = colorStruct.rgba.G
+	colorStruct.B = colorStruct.rgba.B
+	colorStruct.A = colorStruct.rgba.A
+
+	return colorStruct
 }
 
 func ColorCategory(color color.RGBA) string {
