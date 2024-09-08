@@ -1,4 +1,4 @@
-package palettelib 
+package palettelib
 
 import (
 	"bytes"
