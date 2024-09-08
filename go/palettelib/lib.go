@@ -232,7 +232,7 @@ func getAverageColorDistance(colorMap *map[color.Color]ColorStruct) float64 {
 	return total / count
 }
 
-func GetJsonForImage(imgData *image.Image, numberOfColors int, numberOfTopDistincts int) string {
+func getColorMap(imgData *image.Image) (map[color.Color]ColorStruct, ColorStruct) {
 
 	var largest ColorStruct
 
@@ -243,14 +243,14 @@ func GetJsonForImage(imgData *image.Image, numberOfColors int, numberOfTopDistin
 
 			colr := (*imgData).At(x, y)
 			colorStruct := toColorStruct(colr)
-			value, present := findColorStruct(colr, colorMap)
+			value, present := colorMap[colr]
 			count := 1
-			colorStruct.rgba = color.RGBAModel.Convert(colr).(color.RGBA)
 			if present {
 				count = value.Count + 1
 				colorStruct.category = value.category
 			} else {
 				colorStruct.category = ColorCategory(colorStruct.rgba)
+				colorStruct.rgba = color.RGBAModel.Convert(colr).(color.RGBA)
 			}
 			colorStruct.Count = count
 			colorStruct.R = colorStruct.rgba.R
@@ -267,6 +267,12 @@ func GetJsonForImage(imgData *image.Image, numberOfColors int, numberOfTopDistin
 			colorMap[colr] = colorStruct
 		}
 	}
+	return colorMap, largest
+}
+
+func GetJsonForImage(imgData *image.Image, numberOfColors int, numberOfTopDistincts int) string {
+
+	colorMap, largest := getColorMap(imgData)
 	// end := time.Since(start)
 	// fmt.Printf("Conversion took %s", end)
 	// fmt.Println(" Ending image processing.")
@@ -416,16 +422,6 @@ func ColorCategory(color color.RGBA) string {
 		}
 	}
 	return lowestCat
-}
-
-func findColorStruct(colr color.Color, colorMap map[color.Color]ColorStruct) (*ColorStruct, bool) {
-	// for i := 0; i < 12; i++ {
-	colrStruct, present := colorMap[colr]
-	if present {
-		return &colrStruct, true
-	}
-	// }
-	return nil, false
 }
 
 // Calculate the distance between two colors as if they were points in a 3D space.
