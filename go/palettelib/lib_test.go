@@ -27,6 +27,28 @@ func TestColorCategory(t *testing.T) {
 	}
 }
 
+var rgbToHSLTest = []struct {
+	in  struct{ r, g, b uint8 }
+	out struct{ h, s, l float64 }
+}{
+	{struct{ r, g, b uint8 }{r: 255, g: 255, b: 255}, struct{ h, s, l float64 }{0, 0, 1}},
+	{struct{ r, g, b uint8 }{r: 36, g: 20, b: 250}, struct{ h, s, l float64 }{h: 244.174000, s: 0.958000, l: 0.529000}},
+	{struct{ r, g, b uint8 }{r: 120, g: 10, b: 55}, struct{ h, s, l float64 }{h: 335.45500, s: 0.846, l: 0.255000}},
+	{struct{ r, g, b uint8 }{r: 60, g: 113, b: 209}, struct{ h, s, l float64 }{h: 218.65800, s: 0.618, l: 0.527}},
+}
+
+func TestHSLConversion(t *testing.T) {
+	for _, tt := range rgbToHSLTest {
+		t.Run(fmt.Sprintf("R: %d G: %d B: %d", tt.in.r, tt.in.g, tt.in.b), func(t *testing.T) {
+			h, s, l := GetHSL(tt.in.r, tt.in.g, tt.in.b)
+			if h != tt.out.h || s != tt.out.s || l != tt.out.l {
+				t.Errorf("%v %v %v", h != tt.out.h, s != tt.out.s, l != tt.out.l)
+				t.Errorf("got %f %f %f, want %f %f %f", h, s, l, tt.out.h, tt.out.s, tt.out.l)
+			}
+		})
+	}
+}
+
 func Test_testRGBDistance_Expecting3dPointDistance(t *testing.T) {
 	//7,4,3
 	// 17,6,2
