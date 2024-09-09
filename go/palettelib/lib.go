@@ -19,13 +19,16 @@ type ColorStruct struct {
 	color    color.Color
 	rgba     color.RGBA
 	Category string
+
 	R        uint8
 	G        uint8
 	B        uint8
 	A        uint8
+
 	H        float64
 	S        float64
 	L        float64
+	
 	Count    int
 }
 
@@ -266,12 +269,6 @@ L = [½(M + m)]/255 = (M + m)/510.
 https://www.had2know.org/technology/hsl-rgb-color-converter.html
 © 2010-2023 had2know.org
 */
-
-func getLightness(rgba color.RGBA) float64 {
-	max := math.Max(float64(rgba.R), math.Max(float64(rgba.G), float64(rgba.B)))
-	min := math.Min(float64(rgba.R), math.Min(float64(rgba.G), float64(rgba.B)))
-	return (0.5 * (max + min)) / 255
-}
 
 func GetHSL(r, g, b uint8) (float64, float64, float64) {
 	Rnot := float64(r) / 255
