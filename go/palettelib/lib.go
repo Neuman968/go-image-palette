@@ -20,16 +20,16 @@ type ColorStruct struct {
 	rgba     color.RGBA
 	Category string
 
-	R        uint8
-	G        uint8
-	B        uint8
-	A        uint8
+	R uint8
+	G uint8
+	B uint8
+	A uint8
 
-	H        float64
-	S        float64
-	L        float64
-	
-	Count    int
+	H float64
+	S float64
+	L float64
+
+	Count int
 }
 
 func (s ColorStruct) isWhite() bool {
@@ -271,28 +271,29 @@ https://www.had2know.org/technology/hsl-rgb-color-converter.html
 */
 
 func GetHSL(r, g, b uint8) (float64, float64, float64) {
-	Rnot := float64(r) / 255
-	Gnot := float64(g) / 255
-	Bnot := float64(b) / 255
-	Cmax, Cmin := getMaxMin(Rnot, Gnot, Bnot)
-	delta := Cmax - Cmin
+	rPercent := float64(r) / 255
+	gPercent := float64(g) / 255
+	bPercent := float64(b) / 255
+
+	max, min := math.Max(math.Max(rPercent, gPercent), bPercent), math.Min(math.Min(rPercent, gPercent), bPercent)
+	delta := max - min
 
 	var h, s, l float64
 
 	// Lightness calculation:
-	l = (Cmax + Cmin) / 2
+	l = (max + min) / 2
 	// Hue and Saturation Calculation:
 	if delta == 0 {
 		h = 0
 		s = 0
 	} else {
-		switch Cmax {
-		case Rnot:
-			h = 60 * (math.Mod((Gnot-Bnot)/delta, 6))
-		case Gnot:
-			h = 60 * (((Bnot - Rnot) / delta) + 2)
-		case Bnot:
-			h = 60 * (((Rnot - Gnot) / delta) + 4)
+		switch max {
+		case rPercent:
+			h = 60 * (math.Mod((gPercent-bPercent)/delta, 6))
+		case gPercent:
+			h = 60 * (((bPercent - rPercent) / delta) + 2)
+		case bPercent:
+			h = 60 * (((rPercent - gPercent) / delta) + 4)
 		}
 		if h < 0 {
 			h += 360
@@ -302,22 +303,6 @@ func GetHSL(r, g, b uint8) (float64, float64, float64) {
 	}
 
 	return (math.Round(h*1000) / 1000), (math.Round(s*1000) / 1000), (math.Round(l*1000) / 1000)
-}
-
-func getMaxMin(a, b, c float64) (max, min float64) {
-	if a > b {
-		max = a
-		min = b
-	} else {
-		max = b
-		min = a
-	}
-	if c > max {
-		max = c
-	} else if c < min {
-		min = c
-	}
-	return max, min
 }
 
 func getAccent(previousColors []ColorStruct,
