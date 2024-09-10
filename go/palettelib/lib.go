@@ -40,9 +40,20 @@ func (a ColorStruct) isBlack() bool {
 	return a.R == 0 && a.G == 0 && a.B == 0
 }
 
-type ColorStructAndDist struct {
-	colorStruct ColorStruct
-	distance    float64
+type ColorStats struct {
+	colorMap map[color.Color]ColorStruct
+
+	largest *ColorStruct
+
+	averageColorDistance float64
+
+	averageHue float64
+
+	averageLuminance float64
+
+	averageSaturation float64
+
+	totalPixels int
 }
 
 type ResultColors struct {
@@ -194,29 +205,21 @@ func GetJsonImageForBytes(imgByte []byte, numberOfColors int, numberOfTopDistinc
 	return GetJsonForImage(&img, numberOfColors, numberOfTopDistincts)
 }
 
-// Calculates the average distance between unique colors in the image.
-func getAverageColorDistance(colorMap *map[color.Color]ColorStruct) float64 {
-	var total float64
-	var count float64
-
-	var prev color.Color
-
-	for key := range *colorMap {
-		if prev != nil {
-			total += getRgbDistance(color.RGBAModel.Convert(key).(color.RGBA), color.RGBAModel.Convert(prev).(color.RGBA))
-			count++
-		}
-		prev = key
-	}
-
-	return total / count
-}
-
-func getColorMap(imgData *image.Image) (*map[color.Color]ColorStruct, *ColorStruct) {
+func getColorMap(imgData *image.Image) ColorStats {
 
 	var largest ColorStruct
 
 	var colorMap = make(map[color.Color]ColorStruct)
+
+	var totalDistance float64
+
+	var totalPixels int
+
+	var totalHue float64
+
+	var totalSaturation float64
+
+	var totalLuminance float64
 
 	for y := (*imgData).Bounds().Min.Y; y < (*imgData).Bounds().Max.Y; y += 1 {
 		for x := (*imgData).Bounds().Min.X; x < (*imgData).Bounds().Max.X; x += 1 {
@@ -227,35 +230,91 @@ func getColorMap(imgData *image.Image) (*map[color.Color]ColorStruct, *ColorStru
 				colorStruct.Count = colorStruct.Count + 1
 			} else {
 				colorStruct = newColorStruct(colr)
-				// TODO categorizing colors is costly, move to a different process.
-				// colorStruct.category = ColorCategory(colorStruct.rgba)
+				totalDistance += getRgbDistance(colorStruct.rgba, color.RGBA{R: 255 / 2, G: 255 / 2, B: 255 / 2})
 
+				totalHue += colorStruct.H
+				totalSaturation += colorStruct.S
+				totalLuminance += colorStruct.L
 			}
-			if colorStruct.Count > largest.Count {
+
+			if colorStruct.Count > largest.Count && !colorStruct.isWhite() {
 				largest = colorStruct
 			}
 
 			colorMap[colr] = colorStruct
+			totalPixels++
 		}
 	}
-	return &colorMap, &largest
+
+	return ColorStats{
+		colorMap:             colorMap,
+		largest:              &largest,
+		averageColorDistance: totalDistance / float64(len(colorMap)),
+		averageHue:           totalHue / float64(len(colorMap)),
+		averageSaturation:    totalSaturation / float64(len(colorMap)),
+		averageLuminance:     totalLuminance / float64(len(colorMap)),
+		totalPixels:          totalPixels,
+	}
 }
 
 func GetImagePalette(imgData *image.Image) *ResultColors {
-	colorMap, largest := getColorMap(imgData)
+	stats := getColorMap(imgData)
+
+	largest := stats.largest
 
 	result := &ResultColors{
 		Primary: *largest,
 	}
 
-	averageColorDistance := getAverageColorDistance(colorMap)
-
-	result.Secondary = getAccent([]ColorStruct{*largest}, averageColorDistance, colorMap)
-	result.Tertiary = getAccent([]ColorStruct{*largest, result.Secondary}, averageColorDistance, colorMap)
-	result.Fourth = getAccent([]ColorStruct{*largest, result.Secondary, result.Tertiary}, averageColorDistance, colorMap)
-	result.Fifth = getAccent([]ColorStruct{*largest, result.Secondary, result.Tertiary, result.Fourth}, averageColorDistance, colorMap)
+	result.Primary = getAccent([]ColorStruct{}, &stats)
+	result.Secondary = getAccent([]ColorStruct{result.Primary}, &stats)
+	result.Tertiary = getAccent([]ColorStruct{result.Primary, result.Secondary}, &stats)
+	result.Fourth = getAccent([]ColorStruct{result.Primary, result.Secondary, result.Tertiary}, &stats)
+	result.Fifth = getAccent([]ColorStruct{result.Primary, result.Secondary, result.Tertiary, result.Fourth}, &stats)
 
 	return result
+}
+
+func getAccent(otherColors []ColorStruct, colorStats *ColorStats) ColorStruct {
+
+	var paletteColor ColorStruct
+
+	for _, value := range colorStats.colorMap {
+		// Compare the current value and see if it is a better candidate.
+
+		if paletteColor == (ColorStruct{}) {
+			paletteColor = value
+			continue
+		}
+
+		scorePrevious := getScore(paletteColor, otherColors, colorStats)
+		scoreCurrent := getScore(value, otherColors, colorStats)
+
+		if scoreCurrent > scorePrevious ||
+			(scorePrevious == scoreCurrent && value.Count > paletteColor.Count) {
+			paletteColor = value
+		}
+	}
+
+	if (paletteColor == ColorStruct{} && len(otherColors) > 0) {
+		paletteColor = (otherColors)[0]
+	}
+
+	return paletteColor
+}
+
+func getScore(colorStruct ColorStruct, otherColors []ColorStruct, colorStats *ColorStats) (score int) {
+	score += addScore(isDistanceThresholdFromColors(colorStruct, &otherColors, colorStats.averageColorDistance), 2)
+	score += addScore(getRgbDistance(colorStruct.rgba, color.RGBA{R: 255, G: 255, B: 255}) < colorStats.averageColorDistance, -1)
+	score += addScore(getRgbDistance(colorStruct.rgba, color.RGBA{R: 0, G: 0, B: 0}) < colorStats.averageColorDistance, -1)
+	return
+}
+
+func addScore(isTrue bool, score int) int {
+	if isTrue {
+		return score
+	}
+	return 0
 }
 
 func GetJsonForImage(imgData *image.Image, numberOfColors int, numberOfTopDistincts int) string {
@@ -315,43 +374,8 @@ func GetHSL(r, g, b uint8) (float64, float64, float64) {
 	return (math.Round(h*1000) / 1000), (math.Round(s*1000) / 1000), (math.Round(l*1000) / 1000)
 }
 
-func getAccent(previousColors []ColorStruct,
-	averageDistance float64,
-	colorMap *map[color.Color]ColorStruct) ColorStruct {
-	var secondary ColorStruct
-	for _, value := range *colorMap {
-		if value.Count > secondary.Count &&
-			// isAppealingColor(value.H, value.S, value.L) &&
-			isDistanceThresholdFromColors(value, &previousColors, averageDistance) {
-			secondary = value
-		}
-	}
-
-	if (secondary == ColorStruct{} && len(previousColors) > 0) {
-		secondary = previousColors[0]
-	}
-
-	return secondary
-}
-
-func isAppealingHue(hue float64) bool {
-	// Define appealing hue ranges, e.g., excluding black, white, or extreme hues
-	return (hue >= 0 && hue <= 60) || (hue >= 180 && hue <= 240)
-}
-
-func isHighSaturation(saturation float64) bool {
-	return saturation > 0.3 // Adjust the threshold as needed
-}
-
-func isModerateLuminance(luminance float64) bool {
-	return luminance > 0.2 && luminance < 0.8 // Avoid extreme values
-}
-
-func isAppealingColor(hue, saturation, luminance float64) bool {
-	return isAppealingHue(hue) && isHighSaturation(saturation) && isModerateLuminance(luminance)
-}
-
-func isDistanceThresholdFromColors(color ColorStruct, previousColors *[]ColorStruct, averageDistance float64) bool {
+func isDistanceThresholdFromColors(color ColorStruct, previousColors *[]ColorStruct,
+	averageDistance float64) bool {
 	for _, value := range *previousColors {
 		if getRgbDistance(value.rgba, color.rgba) <= averageDistance {
 			return false
@@ -359,27 +383,6 @@ func isDistanceThresholdFromColors(color ColorStruct, previousColors *[]ColorStr
 	}
 	return true
 }
-
-// func getAverageDistanceFromPrevious(color ColorStruct, previousColors *[]ColorStruct) float64 {
-// 	var total float64
-// 	for _, value := range *previousColors {
-// 		total += getRgbDistance(value.rgba, color.rgba)
-// 	}
-// 	return total / float64(len(*previousColors))
-// }
-
-// func getSortedDict(category string, colorMap map[color.Color]ColorStruct) []ColorStruct {
-// 	var sortedColor []ColorStruct
-// 	for _, value := range colorMap {
-// 		if value.category == category {
-// 			sortedColor = append(sortedColor, value)
-// 		}
-// 	}
-// 	sort.Slice(sortedColor, func(i, j int) bool {
-// 		return sortedColor[i].Count > sortedColor[j].Count
-// 	})
-// 	return sortedColor
-// }
 
 func newColorStruct(colorVal color.Color) ColorStruct {
 	colorStruct := ColorStruct{}

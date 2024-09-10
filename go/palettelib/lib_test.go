@@ -42,7 +42,7 @@ func TestHSLConversion(t *testing.T) {
 		t.Run(fmt.Sprintf("R: %d G: %d B: %d", tt.in.r, tt.in.g, tt.in.b), func(t *testing.T) {
 			h, s, l := GetHSL(tt.in.r, tt.in.g, tt.in.b)
 			if h != tt.out.h || s != tt.out.s || l != tt.out.l {
-				t.Errorf("%v %v %v", h != tt.out.h, s != tt.out.s, l != tt.out.l)
+				// t.Errorf("%v %v %v", h != tt.out.h, s != tt.out.s, l != tt.out.l)
 				t.Errorf("got %f %f %f, want %f %f %f", h, s, l, tt.out.h, tt.out.s, tt.out.l)
 			}
 		})
