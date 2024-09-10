@@ -36,6 +36,10 @@ func (s ColorStruct) isWhite() bool {
 	return s.R == 255 && s.G == 255 && s.B == 255
 }
 
+func (a ColorStruct) isBlack() bool {
+	return a.R == 0 && a.G == 0 && a.B == 0
+}
+
 type ColorStructAndDist struct {
 	colorStruct ColorStruct
 	distance    float64
@@ -227,7 +231,7 @@ func getColorMap(imgData *image.Image) (*map[color.Color]ColorStruct, *ColorStru
 				// colorStruct.category = ColorCategory(colorStruct.rgba)
 
 			}
-			if colorStruct.Count > largest.Count && !colorStruct.isWhite() {
+			if colorStruct.Count > largest.Count {
 				largest = colorStruct
 			}
 
@@ -237,8 +241,7 @@ func getColorMap(imgData *image.Image) (*map[color.Color]ColorStruct, *ColorStru
 	return &colorMap, &largest
 }
 
-func GetJsonForImage(imgData *image.Image, numberOfColors int, numberOfTopDistincts int) string {
-
+func GetImagePalette(imgData *image.Image) *ResultColors {
 	colorMap, largest := getColorMap(imgData)
 
 	result := &ResultColors{
@@ -251,6 +254,13 @@ func GetJsonForImage(imgData *image.Image, numberOfColors int, numberOfTopDistin
 	result.Tertiary = getAccent([]ColorStruct{*largest, result.Secondary}, averageColorDistance, colorMap)
 	result.Fourth = getAccent([]ColorStruct{*largest, result.Secondary, result.Tertiary}, averageColorDistance, colorMap)
 	result.Fifth = getAccent([]ColorStruct{*largest, result.Secondary, result.Tertiary, result.Fourth}, averageColorDistance, colorMap)
+
+	return result
+}
+
+func GetJsonForImage(imgData *image.Image, numberOfColors int, numberOfTopDistincts int) string {
+
+	result := GetImagePalette(imgData)
 
 	binary, _ := json.Marshal(result)
 	// // todo handle json marshal error.
@@ -311,7 +321,8 @@ func getAccent(previousColors []ColorStruct,
 	var secondary ColorStruct
 	for _, value := range *colorMap {
 		if value.Count > secondary.Count &&
-			isAverageDistanceFromAllColors(value, &previousColors, averageDistance) {
+			// isAppealingColor(value.H, value.S, value.L) &&
+			isDistanceThresholdFromColors(value, &previousColors, averageDistance) {
 			secondary = value
 		}
 	}
@@ -323,7 +334,24 @@ func getAccent(previousColors []ColorStruct,
 	return secondary
 }
 
-func isAverageDistanceFromAllColors(color ColorStruct, previousColors *[]ColorStruct, averageDistance float64) bool {
+func isAppealingHue(hue float64) bool {
+	// Define appealing hue ranges, e.g., excluding black, white, or extreme hues
+	return (hue >= 0 && hue <= 60) || (hue >= 180 && hue <= 240)
+}
+
+func isHighSaturation(saturation float64) bool {
+	return saturation > 0.3 // Adjust the threshold as needed
+}
+
+func isModerateLuminance(luminance float64) bool {
+	return luminance > 0.2 && luminance < 0.8 // Avoid extreme values
+}
+
+func isAppealingColor(hue, saturation, luminance float64) bool {
+	return isAppealingHue(hue) && isHighSaturation(saturation) && isModerateLuminance(luminance)
+}
+
+func isDistanceThresholdFromColors(color ColorStruct, previousColors *[]ColorStruct, averageDistance float64) bool {
 	for _, value := range *previousColors {
 		if getRgbDistance(value.rgba, color.rgba) <= averageDistance {
 			return false
