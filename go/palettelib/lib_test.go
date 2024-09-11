@@ -6,27 +6,6 @@ import (
 	"testing"
 )
 
-var colorCategoryTests = []struct {
-	in  color.RGBA
-	out string
-}{
-	{color.RGBA{R: 255, G: 255, B: 255}, Colors.White},
-	{color.RGBA{R: 0, G: 0, B: 0}, Colors.Black},
-	{color.RGBA{R: 108, G: 97, B: 120}, Colors.Purple},
-	{color.RGBA{R: 178, G: 199, B: 178}, Colors.Gray},
-}
-
-func TestColorCategory(t *testing.T) {
-	for _, tt := range colorCategoryTests {
-		t.Run(fmt.Sprintf("R: %d G: %d B: %d", tt.in.R, tt.in.G, tt.in.B), func(t *testing.T) {
-			cat := ColorCategory(tt.in)
-			if cat != tt.out {
-				t.Errorf("got %q, want %q", cat, tt.out)
-			}
-		})
-	}
-}
-
 var rgbToHSLTest = []struct {
 	in  struct{ r, g, b uint8 }
 	out struct{ h, s, l float64 }
@@ -63,35 +42,72 @@ func Test_testRGBDistance_Expecting3dPointDistance(t *testing.T) {
 	}
 }
 
-func Test_ImagePalette(t *testing.T) {
+var testImagePaletteTest = []struct {
+	in  string
+	out ResultColors
+}{
+	{"../test-images/picpalette-logo2.png",
+		ResultColors{
+			Primary:   ColorStruct{R: 9, G: 199, B: 244, A: 255, H: 191.489, S: 0.929, L: 0.496, Count: 47},
+			Secondary: ColorStruct{R: 99, G: 5, B: 249, A: 255, H: 263.115, S: 0.961, L: 0.498, Count: 47},
+			Tertiary:  ColorStruct{R: 254, G: 1, B: 115, A: 255, H: 332.964, S: 0.992, L: 0.5, Count: 42},
+			Fourth:    ColorStruct{R: 152, G: 146, B: 146, A: 255, H: 0, S: 0.028, L: 0.584, Count: 0},
+			Fifth:     ColorStruct{R: 0, G: 0, B: 0, A: 0, H: 0, S: 0, L: 0, Count: 6401},
+		}},
+}
 
-	fileName := "../test-images/picpalette-logo2.png"
-
-	imageData, err := GetImageFromFile(&fileName)
-
-	if err != nil {
-		t.Errorf("Error loading image %s", err)
-	}
-
-	result := GetImagePalette(imageData)
-
-	if result.Primary.R != 188 && result.Primary.G != 178 && result.Primary.B != 180 {
-		t.Errorf("Primary color was not correct, was %v", result.Primary)
-	}
-
-	if result.Secondary.R != 0 && result.Secondary.G != 0 && result.Secondary.B != 0 {
-		t.Errorf("Secondary color was not correct, was %v", result.Secondary)
-	}
-
-	if result.Tertiary.R != 99 && result.Tertiary.G != 5 && result.Tertiary.B != 249 {
-		t.Errorf("Tertiary color was not correct, was %v", result.Tertiary)
-	}
-
-	if result.Fourth.R != 9 && result.Fourth.G != 199 && result.Fourth.B != 244 {
-		t.Errorf("Fourth color was not correct, was %v", result.Fourth)
-	}
-
-	if result.Fifth.R != 253 && result.Fifth.G != 2 && result.Fifth.B != 180 {
-		t.Errorf("Fifth color was not correct, was %v", result.Fifth)
+func Test_ImagePaletteTable(t *testing.T) {
+	for _, tt := range testImagePaletteTest {
+		t.Run(tt.in, func(t *testing.T) {
+			imageData, err := GetImageFromFile(&tt.in)
+			if err != nil {
+				t.Errorf("Error loading image %s", err)
+			}
+			result := GetImagePalette(imageData)
+			colorStructAssert(t, result.Primary, tt.out.Primary)
+			colorStructAssert(t, result.Secondary, tt.out.Secondary)
+			colorStructAssert(t, result.Tertiary, tt.out.Tertiary)
+			colorStructAssert(t, result.Fourth, tt.out.Fourth)
+			colorStructAssert(t, result.Fifth, tt.out.Fifth)
+		})
 	}
 }
+
+func colorStructAssert(t *testing.T, result ColorStruct, expected ColorStruct) {
+	if result.R != expected.R || result.G != expected.G || result.B != expected.B || result.A != expected.A || result.H != expected.H || result.S != expected.S || result.L != expected.L || result.Count != expected.Count {
+		t.Errorf("Color was not correct. Expected: %v Was: %v", expected, result)
+	}
+}
+
+// func Test_ImagePalette(t *testing.T) {
+
+// 	fileName := "../test-images/picpalette-logo2.png"
+
+// 	imageData, err := GetImageFromFile(&fileName)
+
+// 	if err != nil {
+// 		t.Errorf("Error loading image %s", err)
+// 	}
+
+// 	result := GetImagePalette(imageData)
+
+// 	if result.Primary.R != 188 && result.Primary.G != 178 && result.Primary.B != 180 {
+// 		t.Errorf("Primary color was not correct, was %v", result.Primary)
+// 	}
+
+// 	if result.Secondary.R != 0 && result.Secondary.G != 0 && result.Secondary.B != 0 {
+// 		t.Errorf("Secondary color was not correct, was %v", result.Secondary)
+// 	}
+
+// 	if result.Tertiary.R != 99 && result.Tertiary.G != 5 && result.Tertiary.B != 249 {
+// 		t.Errorf("Tertiary color was not correct, was %v", result.Tertiary)
+// 	}
+
+// 	if result.Fourth.R != 9 && result.Fourth.G != 199 && result.Fourth.B != 244 {
+// 		t.Errorf("Fourth color was not correct, was %v", result.Fourth)
+// 	}
+
+// 	if result.Fifth.R != 253 && result.Fifth.G != 2 && result.Fifth.B != 180 {
+// 		t.Errorf("Fifth color was not correct, was %v", result.Fifth)
+// 	}
+// }

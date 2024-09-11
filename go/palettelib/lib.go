@@ -69,38 +69,6 @@ type ResultColors struct {
 	TopColors []ColorStruct
 }
 
-var Colors = newColorRegistry()
-
-func newColorRegistry() *colorRegistry {
-	return &colorRegistry{
-		Red:     "red",
-		Green:   "green",
-		Blue:    "blue",
-		White:   "white",
-		Gray:    "gray",
-		Yellow:  "yellow",
-		Purple:  "purple",
-		Orange:  "orange",
-		Brown:   "brown",
-		Pink:    "pink",
-		Unknown: "unknown",
-	}
-}
-
-type colorRegistry struct {
-	Red     string
-	Green   string
-	Blue    string
-	Black   string
-	White   string
-	Gray    string
-	Yellow  string
-	Purple  string
-	Orange  string
-	Brown   string
-	Pink    string
-	Unknown string
-}
 
 func GetImageFromFile(imgFileName *string) (*image.Image, error) {
 	imgFile, err := os.Open(*imgFileName)
