@@ -193,10 +193,20 @@ func getAccent(colors *[]ColorStruct, otherColors []ColorStruct, colorStats *Col
 
 func getScore(colorStruct ColorStruct, otherColors []ColorStruct, colorStats *ColorStats) (score int) {
 	score += addScore(isDistanceThresholdFromColors(colorStruct, &otherColors, colorStats.averageColorDistance), 2)
+	score += addScore(isAlreadyUsed(colorStruct, otherColors), -1)
 	score += addScore(getRgbDistance(colorStruct.rgba, color.RGBA{R: 255, G: 255, B: 255}) < colorStats.averageColorDistance, -1)
 	score += addScore(getRgbDistance(colorStruct.rgba, color.RGBA{R: 0, G: 0, B: 0}) < colorStats.averageColorDistance, -1)
 	score += addScore((float64(colorStruct.Count)/float64(colorStats.totalPixels) < 0.20), -1)
 	return
+}
+
+func isAlreadyUsed(colorStruct ColorStruct, otherColors []ColorStruct) bool {
+	for _, value := range otherColors {
+		if value.rgba == colorStruct.rgba {
+			return true
+		}
+	}
+	return false
 }
 
 func addScore(isTrue bool, score int) int {
