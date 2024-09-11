@@ -2,6 +2,7 @@ package palettelib
 
 import (
 	"bytes"
+	"cmp"
 	"encoding/json"
 	"image"
 	"image/color"
@@ -10,9 +11,8 @@ import (
 	"log"
 	"math"
 	"os"
+	"slices"
 )
-
-const LIGHT_THRESHOLD = .40
 
 // Contains a reference to the RGBA image content as well as the number of times it occurs.
 type ColorStruct struct {
@@ -29,14 +29,6 @@ type ColorStruct struct {
 	L float64
 
 	Count int
-}
-
-func (s ColorStruct) isWhite() bool {
-	return s.R == 255 && s.G == 255 && s.B == 255
-}
-
-func (a ColorStruct) isBlack() bool {
-	return a.R == 0 && a.G == 0 && a.B == 0
 }
 
 type ColorStats struct {
@@ -68,7 +60,6 @@ type ResultColors struct {
 
 	TopColors []ColorStruct
 }
-
 
 func GetImageFromFile(imgFileName *string) (*image.Image, error) {
 	imgFile, err := os.Open(*imgFileName)
@@ -122,7 +113,7 @@ func getColorMap(imgData *image.Image) ColorStats {
 				totalLuminance += colorStruct.L
 			}
 
-			if colorStruct.Count > largest.Count && !colorStruct.isWhite() {
+			if colorStruct.Count > largest.Count {
 				largest = colorStruct
 			}
 
@@ -151,20 +142,32 @@ func GetImagePalette(imgData *image.Image) *ResultColors {
 		Primary: *largest,
 	}
 
-	result.Primary = getAccent([]ColorStruct{}, &stats)
-	result.Secondary = getAccent([]ColorStruct{result.Primary}, &stats)
-	result.Tertiary = getAccent([]ColorStruct{result.Primary, result.Secondary}, &stats)
-	result.Fourth = getAccent([]ColorStruct{result.Primary, result.Secondary, result.Tertiary}, &stats)
-	result.Fifth = getAccent([]ColorStruct{result.Primary, result.Secondary, result.Tertiary, result.Fourth}, &stats)
+	sortedColors := make([]ColorStruct, 0, len(stats.colorMap))
+	for _, value := range stats.colorMap {
+		sortedColors = append(sortedColors, value)
+	}
+
+	slices.SortFunc(sortedColors, func(i, j ColorStruct) int {
+		return cmp.Or(
+			cmp.Compare(i.Count, j.Count),
+			cmp.Compare(i.H, j.H),
+		)
+	})
+
+	result.Primary = getAccent(&sortedColors, []ColorStruct{}, &stats)
+	result.Secondary = getAccent(&sortedColors, []ColorStruct{result.Primary}, &stats)
+	result.Tertiary = getAccent(&sortedColors, []ColorStruct{result.Primary, result.Secondary}, &stats)
+	result.Fourth = getAccent(&sortedColors, []ColorStruct{result.Primary, result.Secondary, result.Tertiary}, &stats)
+	result.Fifth = getAccent(&sortedColors, []ColorStruct{result.Primary, result.Secondary, result.Tertiary, result.Fourth}, &stats)
 
 	return result
 }
 
-func getAccent(otherColors []ColorStruct, colorStats *ColorStats) ColorStruct {
+func getAccent(colors *[]ColorStruct, otherColors []ColorStruct, colorStats *ColorStats) ColorStruct {
 
 	var paletteColor ColorStruct
 
-	for _, value := range colorStats.colorMap {
+	for _, value := range *colors {
 		// Compare the current value and see if it is a better candidate.
 
 		if paletteColor == (ColorStruct{}) {
@@ -175,7 +178,7 @@ func getAccent(otherColors []ColorStruct, colorStats *ColorStats) ColorStruct {
 		scorePrevious := getScore(paletteColor, otherColors, colorStats)
 		scoreCurrent := getScore(value, otherColors, colorStats)
 
-		if scoreCurrent > scorePrevious ||
+		if scoreCurrent >= scorePrevious ||
 			(scorePrevious == scoreCurrent && value.Count > paletteColor.Count) {
 			paletteColor = value
 		}
@@ -192,6 +195,7 @@ func getScore(colorStruct ColorStruct, otherColors []ColorStruct, colorStats *Co
 	score += addScore(isDistanceThresholdFromColors(colorStruct, &otherColors, colorStats.averageColorDistance), 2)
 	score += addScore(getRgbDistance(colorStruct.rgba, color.RGBA{R: 255, G: 255, B: 255}) < colorStats.averageColorDistance, -1)
 	score += addScore(getRgbDistance(colorStruct.rgba, color.RGBA{R: 0, G: 0, B: 0}) < colorStats.averageColorDistance, -1)
+	score += addScore((float64(colorStruct.Count)/float64(colorStats.totalPixels) < 0.20), -1)
 	return
 }
 
@@ -272,7 +276,7 @@ func isDistanceThresholdFromColors(color ColorStruct, previousColors *[]ColorStr
 func newColorStruct(colorVal color.Color) ColorStruct {
 	colorStruct := ColorStruct{}
 	colorStruct.color = colorVal
-	colorStruct.Count = 0
+	colorStruct.Count = 1
 
 	colorStruct.rgba = color.RGBAModel.Convert(colorVal).(color.RGBA)
 	colorStruct.R = colorStruct.rgba.R
