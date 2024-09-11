@@ -48,11 +48,11 @@ var testImagePaletteTest = []struct {
 }{
 	{"../test-images/picpalette-logo2.png",
 		ResultColors{
-			Primary:   ColorStruct{R: 9, G: 199, B: 244, A: 255, H: 191.489, S: 0.929, L: 0.496, Count: 47},
-			Secondary: ColorStruct{R: 99, G: 5, B: 249, A: 255, H: 263.115, S: 0.961, L: 0.498, Count: 47},
-			Tertiary:  ColorStruct{R: 254, G: 1, B: 115, A: 255, H: 332.964, S: 0.992, L: 0.5, Count: 42},
-			Fourth:    ColorStruct{R: 152, G: 146, B: 146, A: 255, H: 0, S: 0.028, L: 0.584, Count: 0},
-			Fifth:     ColorStruct{R: 0, G: 0, B: 0, A: 0, H: 0, S: 0, L: 0, Count: 6401},
+			Primary: ColorStruct{R: 188, G: 178, B: 180, A: 255, H: 348, S: 0.069, L: 0.718, Count: 27743},
+			Secondary: ColorStruct{R: 104, G: 5, B: 249, A: 255, H: 264.344, S: 0.961, L: 0.498, Count: 48},
+			Tertiary: ColorStruct{R: 9, G: 199, B: 244, A: 255, H: 191.489, S: 0.929, L: 0.496, Count: 48},
+			Fourth: ColorStruct{R: 254, G: 1, B: 115, A: 255, H: 332.964, S: 0.992, L: 0.5, Count: 43},
+			Fifth: ColorStruct{R: 0, G: 0, B: 0, A: 0, H: 0, S: 0, L: 0, Count: 6402},
 		}},
 }
 
