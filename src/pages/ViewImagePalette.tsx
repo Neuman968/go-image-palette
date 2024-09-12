@@ -1,51 +1,18 @@
 import React from 'react';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
 import { Container } from '@mui/system';
-import { CirclePicker, ColorResult, RGBColor, SwatchesPicker, Color } from 'react-color';
-import axios from 'axios';
+import { ColorResult } from 'react-color';
 import { ImagePalette, RGBAResult } from '../types/ImagePalette';
-import { AppBar, Grid, Palette, Theme } from '@mui/material';
+import { Grid } from '@mui/material';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
 import PaletteCard from '../components/PaletteCard';
 import { PaletteState } from '../types/Palette';
-import TopDistinctSwatches from '../components/TopDistinctSwatches';
+import TopSwatches from '../components/TopSwatches';
 import { useNavigate } from 'react-router';
-import ToolDrawer from '../components/ToolDrawer';
 import { ColorItem } from '../types/ColorItem';
-
-function ButtonViewImagePaletteBar({ primary, secondary, tertiary, fourth, fifth }: { primary: string, secondary: string, tertiary: string, fourth: string, fifth: string }) {
-    return (
-        <Box sx={{ flexGrow: 1 }}>
-            <AppBar
-                position="static"
-                sx={{
-                    backgroundImage: `linear-gradient(144deg,${primary}, ${secondary}, ${tertiary}, ${fourth}, ${fifth})`,
-                    height: '15px',
-                }}
-            >
-                <Toolbar>
-                    {/* <IconButton
-                        size="large"
-                        edge="start"
-                        color="inherit"
-                        aria-label="menu"
-                        sx={{ mr: 2 }}
-                    >
-                        <MenuIcon />
-                    </IconButton> */}
-                </Toolbar>
-            </AppBar>
-        </Box>
-    );
-}
 
 function componentToHex(c: number): string {
     var hex = c.toString(16);
@@ -58,6 +25,20 @@ function rgbToHex(r: number, g: number, b: number): string {
 
 function rgbResultToHex(clrResult: RGBAResult): string {
     return rgbToHex(clrResult.R, clrResult.G, clrResult.B)
+}
+
+
+function rgbaResultToReactColor(color: RGBAResult): ColorResult {
+    return {
+        hex: rgbResultToHex(color),
+        rgb: { r: color.R, g: color.G, b: color.B, a: color.A },
+        hsl: { h: color.H, s: color.S, l: color.L },
+    }
+}
+
+
+function reactColorToRGBAResult(clr: ColorResult): RGBAResult {
+    return { R: clr.rgb.r, G: clr.rgb.g, B: clr.rgb.b, A: clr.rgb.a || 0, H: clr.hsl.h, S: clr.hsl.s, L: clr.hsl.l || 0, Count: 0 }
 }
 
 type Props = {
@@ -74,15 +55,20 @@ function ViewImagePalette(props: Props) {
 
     const [selectedColor, setSelectedColor] = React.useState<keyof PaletteState | undefined>()
 
+    const [editingColor, setEditingColor] = React.useState<keyof PaletteState | undefined>()
+
     const [selectedRgbaColor, setSelectedRgbaColor] = React.useState<RGBAResult | undefined>(undefined)
 
     const navigate = useNavigate()
 
     const handleColorClick = (clr: ColorResult, ev: React.ChangeEvent) => {
-        const selectedSwatch = { R: clr.rgb.r, G: clr.rgb.g, B: clr.rgb.b, A: clr.rgb.a || 0, Count: 0 }
+        const selectedSwatch = reactColorToRGBAResult(clr)
         if (selectedColor && props.imagePalette) {
-            const newState = props.imagePalette
-            newState[selectedColor] = selectedSwatch
+            if (editingColor === selectedColor) {
+
+                const newState = props.imagePalette
+                newState[selectedColor] = selectedSwatch
+            }
             // props.setImagePalette(newState)
             setSelectedColor(undefined)
         } else {
@@ -94,27 +80,25 @@ function ViewImagePalette(props: Props) {
     const paletteCardOnClick = (paletteKey: keyof PaletteState) => {
         if (selectedRgbaColor) {
             const newState = props.imagePalette
-            newState[paletteKey] = selectedRgbaColor
+            if (editingColor === paletteKey) {
+                console.log('editing color', editingColor)
+                newState[paletteKey] = selectedRgbaColor
+            }
             // props.setImagePalette(newState)
             setSelectedColor(undefined)
             setSelectedRgbaColor(undefined)
         } else {
             setSelectedColor(paletteKey !== selectedColor ? paletteKey : undefined)
         }
+
+        const paletteColor = props.imagePalette[paletteKey]
+        const reactColor = rgbaResultToReactColor(paletteColor)
+
+        props.colorToolOnSelect({ hex: reactColor.hex, rgbResult: paletteColor, reactColor: reactColor })
     }
 
     return (
         <React.Fragment>
-            {
-                props.imagePalette &&
-                <ButtonViewImagePaletteBar
-                    secondary={rgbToHex(props.imagePalette.Secondary.R, props.imagePalette.Secondary.G, props.imagePalette.Secondary.B)}
-                    primary={rgbToHex(props.imagePalette.Primary.R, props.imagePalette.Primary.G, props.imagePalette.Primary.B)}
-                    tertiary={rgbToHex(props.imagePalette.Tertiary.R, props.imagePalette.Tertiary.G, props.imagePalette.Tertiary.B)}
-                    fourth={rgbResultToHex(props.imagePalette.Fourth)}
-                    fifth={rgbResultToHex(props.imagePalette.Fifth)}
-                />
-            }
             <Container sx={{ overflowX: 'hidden' }}>
                 {props.imagePalette &&
                     <Grid sx={{ paddingTop: '1em', paddingBottom: '.2em' }} container spacing={2} justifyContent="center">
@@ -124,8 +108,10 @@ function ViewImagePalette(props: Props) {
                                 .map((key: keyof PaletteState) =>
                                     <Grid key={key} item>
                                         <PaletteCard
-                                            onClick={() => paletteCardOnClick(key)}
+                                            onSelect={() => paletteCardOnClick(key)}
+                                            onEdit={() => setEditingColor(editingColor === key ? undefined : key)}
                                             selected={selectedColor === key}
+                                            editing={editingColor === key}
                                             color={rgbResultToHex(props.imagePalette!![key])}
                                         />
                                     </Grid>)
@@ -148,13 +134,13 @@ function ViewImagePalette(props: Props) {
                         title=""
                     />
                     <CardContent sx={{ padding: '0px' }}>
-                        {props.imagePalette && <TopDistinctSwatches
+                        {props.imagePalette && <TopSwatches
                             imagePalette={props.imagePalette}
                             onClick={handleColorClick}
                         />}
                         <CardActions>
                             <Button variant="contained" size="small">Share</Button>
-                            <Button variant="contained" size="small" onClick={() => navigate('/')}>Upload Another</Button>
+                            <Button color="secondary" variant="contained" size="small" onClick={() => navigate('/')}>Upload Another</Button>
                         </CardActions>
                     </CardContent>
                 </Card>

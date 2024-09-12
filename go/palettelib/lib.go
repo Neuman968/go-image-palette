@@ -14,6 +14,14 @@ import (
 	"slices"
 )
 
+const (
+	hueThreshold        = 3.0
+	saturationThreshold = 0.4
+	luminanceThreshold  = 0.2
+)
+
+const numberOfColors = 15
+
 // Contains a reference to the RGBA image content as well as the number of times it occurs.
 type ColorStruct struct {
 	color color.Color
@@ -58,7 +66,15 @@ type ResultColors struct {
 
 	Fifth ColorStruct
 
-	TopColors []ColorStruct
+	PrimarySimilar []ColorStruct
+
+	SecondarySimilar []ColorStruct
+
+	TertiarySimilar []ColorStruct
+
+	FourthSimilar []ColorStruct
+
+	FifthSimilar []ColorStruct
 }
 
 func GetImageFromFile(imgFileName *string) (*image.Image, error) {
@@ -160,7 +176,41 @@ func GetImagePalette(imgData *image.Image) *ResultColors {
 	result.Fourth = getAccent(&sortedColors, []ColorStruct{result.Primary, result.Secondary, result.Tertiary}, &stats)
 	result.Fifth = getAccent(&sortedColors, []ColorStruct{result.Primary, result.Secondary, result.Tertiary, result.Fourth}, &stats)
 
+	colorChannel := make(chan []ColorStruct, 5)
+
+	slices.Reverse(sortedColors)
+
+	go GetSimilarColors(result.Primary, sortedColors, &stats, 10, colorChannel)
+	go GetSimilarColors(result.Secondary, sortedColors, &stats, 10, colorChannel)
+	go GetSimilarColors(result.Tertiary, sortedColors, &stats, 10, colorChannel)
+	go GetSimilarColors(result.Fourth, sortedColors, &stats, 10, colorChannel)
+	go GetSimilarColors(result.Fifth, sortedColors, &stats, 10, colorChannel)
+
+	result.PrimarySimilar = <-colorChannel
+	result.SecondarySimilar = <-colorChannel
+	result.TertiarySimilar = <-colorChannel
+	result.FourthSimilar = <-colorChannel
+	result.FifthSimilar = <-colorChannel
+
 	return result
+}
+
+func GetSimilarColors(color ColorStruct, colors []ColorStruct, colorStats *ColorStats, size int, c chan<- []ColorStruct) {
+
+	var similarColors []ColorStruct
+
+	for _, value := range colors {
+		if (value.H > color.H-hueThreshold && value.H < color.H+hueThreshold) &&
+			(value.S > color.S-saturationThreshold && value.S < color.S+saturationThreshold) &&
+			(value.L > color.L-luminanceThreshold && value.L < color.L+luminanceThreshold) {
+			similarColors = append(similarColors, value)
+		}
+		if len(similarColors) >= numberOfColors {
+			break
+		}
+	}
+
+	c <- similarColors
 }
 
 func getAccent(colors *[]ColorStruct, otherColors []ColorStruct, colorStats *ColorStats) ColorStruct {

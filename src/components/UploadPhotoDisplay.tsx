@@ -1,7 +1,7 @@
-import { Button, ButtonGroup, Grid, Typography } from '@mui/material'
+import { Button, Grid, Typography } from '@mui/material'
 import { Box, Container } from '@mui/system'
 import beachImage from '../assets/BEACH.jpg'
-import React, { FormEvent } from 'react'
+import React from 'react'
 
 type Props = {
     setFile: (file: File) => void,
@@ -33,15 +33,15 @@ function UploadPhotoDisplay(props: Props) {
                                 <Button variant="contained" component="span">Upload</Button>
                             </label>
                         </Box>
-                        <Box pl={2}>
-                            <Button variant="contained">Examples</Button>
-                        </Box>
+                        {/* <Box pl={2}>
+                            <Button color="secondary" variant="contained">Examples</Button>
+                        </Box> */}
                     </Box>
                 </Box>
             </Grid>
             <Grid item xs={4}>
                 <Box>
-                    <img alt="Beach picture" style={{ width: '450px', height: '400px', borderRadius: '8px' }} src={beachImage} />
+                    <img alt="Beach" style={{ width: '450px', height: '400px', borderRadius: '8px' }} src={beachImage} />
                 </Box>
             </Grid>
         </Grid>

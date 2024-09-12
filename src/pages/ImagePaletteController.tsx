@@ -6,6 +6,8 @@ import ViewImagePalette from './ViewImagePalette';
 import { ColorItem } from '../types/ColorItem';
 import { rgbToHex, rgbResultToHex } from '../utils/colorUtils';
 import { PaletteState } from '../types/Palette';
+import { Box } from '@mui/material';
+import PaletteAppBar from '../components/PaletteAppBar';
 
 type Props = {
     file: File | undefined,
@@ -41,92 +43,58 @@ function ImagePaletteController(props: Props) {
         Fifth: props.imagePalette?.Fifth!!
     })
 
-    console.log('Rendering Palette Controller')
-
     const rgbCache = React.useMemo(() => {
-        console.log('Computing rgb cache')
         if (props.imagePalette) {
             const cacheMap = newCacheFromResult([
-                // props.imagePalette.TopDistinctRed,
-                // props.imagePalette.TopDistinctGreen,
-                // props.imagePalette.TopDistinctBlue,
-                // props.imagePalette.TopDistinctYellow,
-                // props.imagePalette.TopDistinctOrange,
-                // props.imagePalette.TopDistinctPurple,
-                // props.imagePalette.TopDistinctPink,
-                // props.imagePalette.TopDistinctBrown,
-                // props.imagePalette.TopDistinctGray,
-                // props.imagePalette.TopDistinctBlack,
-                // props.imagePalette.TopDistinctWhite,
-                // props.imagePalette.Red,
-                // props.imagePalette.Green,
-                // props.imagePalette.Blue,
-                // props.imagePalette.Yellow,
-                // props.imagePalette.Orange,
-                // props.imagePalette.Purple,
-                // props.imagePalette.Pink,
-                // props.imagePalette.Brown,
-                // props.imagePalette.Gray,
-                // props.imagePalette.Black,
-                // props.imagePalette.White,
                 [props.imagePalette.Primary, props.imagePalette.Secondary, props.imagePalette.Tertiary, props.imagePalette.Fourth, props.imagePalette.Fifth],
+                props.imagePalette.PrimarySimilar, props.imagePalette.SecondarySimilar, props.imagePalette.TertiarySimilar, props.imagePalette.FourthSimilar, props.imagePalette.FifthSimilar
             ])
             return cacheMap
         }
         return new Map()
-        // setRgbCache(cacheMap)
-        // const canvas = document.getElementById('card-canvas') as HTMLCanvasElement
-        // const img = new window.Image()
-        // img.src = URL.createObjectURL(props.file)
-
-        // var hRatio = canvas.width / img.width;
-        // var vRatio = canvas.height / img.height;
-        // var ratio = Math.min(hRatio, vRatio);
-        // var centerShift_x = (canvas.width - img.width * ratio) / 2;
-        // var centerShift_y = (canvas.height - img.height * ratio) / 2;
-        // var ctx = canvas.getContext('2d')!!
-
-        // ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // img.onload = () => {
-        //     ctx.drawImage(img, 0, 0, img.width, img.height,
-        //         centerShift_x, centerShift_y, img.width * ratio, img.height * ratio);
-        // }
-        // var img = new Image();
-        // img.src = URL.createObjectURL(props.file);
-        // img.onload = function() {
-        //     ctx?.drawImage(img, 0, 0, 400, 450);
-        // }
-
     }, [props.imagePalette])
 
     if (shouldRedirect) {
         navigate('/')
     }
 
-    return !shouldRedirect
-        ? <React.Fragment>
-            <ToolDrawer
-                color={selectedColor}
-                colorCount={rgbCache.get(selectedColor?.hex)?.Count}
-                handleSketchPickerChange={setSelectedColor}
-                presetColors={[rgbResultToHex(palette.Primary), 
+    return <React.Fragment>
+        {
+            props.imagePalette &&
+            <PaletteAppBar
+                colorHexes={
+                    [rgbResultToHex(props.imagePalette.Primary),
+                    rgbResultToHex(props.imagePalette.Secondary),
+                    rgbResultToHex(props.imagePalette.Tertiary),
+                    rgbResultToHex(props.imagePalette.Fourth),
+                    rgbResultToHex(props.imagePalette.Fifth)]
+                }
+            />
+        }
+        {!shouldRedirect
+            ? <Box display="flex">
+                <ViewImagePalette
+                    file={props.file!!}
+                    imagePalette={props.imagePalette!!}
+                    palette={palette}
+                    setPaletteState={setPalette}
+                    colorToolOnSelect={setSelectedColor}
+                    rgbCache={rgbCache || new Map()}
+                />
+                <ToolDrawer
+                    color={selectedColor}
+                    colorCount={rgbCache.get(selectedColor?.hex)?.Count}
+                    handleSketchPickerChange={setSelectedColor}
+                    presetColors={[rgbResultToHex(palette.Primary),
                     rgbResultToHex(palette.Secondary),
-                    rgbResultToHex(palette.Tertiary),
                     rgbResultToHex(palette.Tertiary),
                     rgbResultToHex(palette.Fourth),
                     rgbResultToHex(palette.Fifth),
-                ]}
-            />
-            <ViewImagePalette
-                file={props.file!!}
-                imagePalette={props.imagePalette!!}
-                palette={palette}
-                setPaletteState={setPalette}
-                colorToolOnSelect={setSelectedColor}
-                rgbCache={rgbCache || new Map()}
-            />
-        </React.Fragment>
-        : <></>
+                    ]}
+                />
+            </Box>
+            : <></>}
+    </React.Fragment>
 }
 
 export default ImagePaletteController;
