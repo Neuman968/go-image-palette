@@ -6,7 +6,6 @@ import { styled } from '@mui/material/styles';
 type Props = {
     handleSketchPickerChange: (color: ColorItem) => void,
     color?: ColorItem,
-    colorCount: number | undefined,
     presetColors: Array<string>,
 }
 
@@ -38,7 +37,9 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 const drawerWidth = 220
 
 function ToolDrawer(props: Props) {
-    const colorCount = props.colorCount || 0
+    const colorCount = props.color?.rgbResult?.Count || 0
+
+    console.log('Draw color', props.color)
 
     return <Drawer
         anchor='right'

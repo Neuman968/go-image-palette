@@ -10,14 +10,14 @@ import PaletteAppBar from '../components/PaletteAppBar';
 import PaletteCard from '../components/PaletteCard';
 import TopSwatches from '../components/TopSwatches';
 import { ColorResult } from 'react-color';
-
+import tinycolor from 'tinycolor2';
 
 function componentToHex(c: number): string {
     var hex = c.toString(16);
     return hex.length === 1 ? "0" + hex : hex;
 }
 
-function rgbaResultToReactColor(color: RGBAResult): ColorResult{
+function rgbaResultToReactColor(color: RGBAResult): ColorResult {
     return {
         hex: rgbResultToHex(color),
         rgb: { r: color.R, g: color.G, b: color.B, a: color.A },
@@ -25,11 +25,21 @@ function rgbaResultToReactColor(color: RGBAResult): ColorResult{
     }
 }
 
-
 function reactColorToRGBAResult(clr: ColorResult): RGBAResult {
     return { R: clr.rgb.r, G: clr.rgb.g, B: clr.rgb.b, A: clr.rgb.a || 0, H: clr.hsl.h, S: clr.hsl.s, L: clr.hsl.l || 0, Count: 0 }
 }
 
+function hexToColorResult(hex: string): ColorResult {
+    const color = tinycolor(hex);
+    const rgb = color.toRgb();
+    const hsl = color.toHsl();
+
+    return {
+        hex: color.toHexString(),
+        rgb: { r: rgb.r, g: rgb.g, b: rgb.b, a: rgb.a },
+        hsl: { h: hsl.h, s: hsl.s, l: hsl.l },
+    };
+}
 
 type Props = {
     file: File | undefined,
@@ -57,7 +67,7 @@ function ImagePaletteController(props: Props) {
 
     const [selectedColor, _setSelectedColor] = React.useState<ColorItem | undefined>(undefined)
 
-    const [selectedPalette, setSelectedPalette] = React.useState<keyof PaletteState | undefined>()
+    const [selectedPalette, _setSelectedPalette] = React.useState<keyof PaletteState | undefined>()
 
     const [editingPalette, setEditingPalette] = React.useState<keyof PaletteState | undefined>()
 
@@ -70,15 +80,35 @@ function ImagePaletteController(props: Props) {
     })
 
 
-    const handleColorChange = (colorItem: ColorItem) => {
+    const handleColorChange = (_colorItem: ColorItem) => {
+
+        const rgbColorResult : (RGBAResult | undefined) = _colorItem.rgbResult || rgbCache.get(_colorItem.hex)
+
+        const reactColor = hexToColorResult(_colorItem.hex)
+
+        const colorItem = { 
+            hex: _colorItem.hex,
+            reactColor: reactColor,
+            rgbResult: rgbColorResult
+        }
+
         _setSelectedColor(colorItem)
-        // console.log('Color Change...', colorItem)
-        if (editingPalette && (colorItem.rgbResult || colorItem.reactColor)) {
-            console.log('Updating Palette...', colorItem.rgbResult)
-            console.log('Updating Palette...', editingPalette)
+        if (editingPalette) {
             setPalette({ ...palette, [editingPalette]: colorItem.rgbResult || reactColorToRGBAResult(colorItem.reactColor!!) })
             setEditingPalette(undefined)
-            setSelectedPalette(undefined)
+            _setSelectedPalette(undefined)
+        }
+    }
+
+    const setSelectedPalette = (key: keyof PaletteState | undefined) => {
+        _setSelectedPalette(key)
+        if (key) {
+            const color = palette[key]
+            _setSelectedColor({
+                hex: rgbResultToHex(color),
+                reactColor: rgbaResultToReactColor(color),
+                rgbResult: color
+            })
         }
     }
 
@@ -150,7 +180,7 @@ function ImagePaletteController(props: Props) {
                         }
                         <CardContent sx={{ padding: '0px' }}>
                             {props.imagePalette && <TopSwatches
-                                colorColumns={[props.imagePalette.PrimarySimilar, props.imagePalette.SecondarySimilar, props.imagePalette.TertiarySimilar, props.imagePalette.FourthSimilar, props.imagePalette.FifthSimilar]}  
+                                colorColumns={[props.imagePalette.PrimarySimilar, props.imagePalette.SecondarySimilar, props.imagePalette.TertiarySimilar, props.imagePalette.FourthSimilar, props.imagePalette.FifthSimilar]}
                                 onClick={(colorResult: ColorResult, _: React.ChangeEvent) => {
                                     const colorFromImage = rgbCache.get(colorResult.hex)
                                     handleColorChange({
@@ -169,7 +199,6 @@ function ImagePaletteController(props: Props) {
                 </Container>
                 <ToolDrawer
                     color={selectedColor}
-                    colorCount={rgbCache.get(selectedColor?.hex || '')?.Count}
                     handleSketchPickerChange={handleColorChange}
                     presetColors={[rgbResultToHex(palette.Primary),
                     rgbResultToHex(palette.Secondary),
