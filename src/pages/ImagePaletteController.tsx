@@ -12,11 +12,6 @@ import TopSwatches from '../components/TopSwatches';
 import { ColorResult } from 'react-color';
 import tinycolor from 'tinycolor2';
 
-function componentToHex(c: number): string {
-    var hex = c.toString(16);
-    return hex.length === 1 ? "0" + hex : hex;
-}
-
 function rgbaResultToReactColor(color: RGBAResult): ColorResult {
     return {
         hex: rgbResultToHex(color),

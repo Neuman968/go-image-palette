@@ -3,7 +3,7 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import { ImagePalette } from './types/ImagePalette';
-import { Typography } from '@mui/material';
+import { IconButton, Typography } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { rgbResultToHex } from './utils/colorUtils';
 import { ReactComponent as Logo } from './assets/logo.svg'
@@ -13,15 +13,23 @@ import { defaultPalette } from './types/DefaultPaletteOptions'
 import { useLoadedWasm } from './context/LoadedWasm';
 import ImagePaletteController from './pages/ImagePaletteController';
 import LoadingPage from './pages/LoadingPage';
+import GitHubIcon from '@mui/icons-material/GitHub';
 
 function Heading() {
-  return <Box sx={{ flexGrow: 1 }}>
+  return <Box>
     <AppBar style={{ backgroundColor: '#333340' }} position="static">
       <Toolbar>
         <Logo style={{ width: '40px', height: '40px' }} />
         <Typography style={{ color: 'white' }}>
           Palette Picker
         </Typography>
+        <Box sx={{ ml: 'auto' }} >
+          <IconButton onClick={() => {
+            window.location.href = "https://github.com/Neuman968/go-image-palette"
+          }}>
+            <GitHubIcon sx={{ color: 'white' }}/>
+          </IconButton>
+        </Box>
       </Toolbar>
     </AppBar>
   </Box>
@@ -78,7 +86,7 @@ function App() {
       <Route path="/examples" element={<></>} />
       <Route path="/loading" element={<LoadingPage />} />
       <Route path="/view" element={<ImagePaletteController file={file!!} imagePalette={imagePalette!!}
-        // setImagePalette={setImagePalette}
+      // setImagePalette={setImagePalette}
       />} />
     </Routes>
   </ThemeProvider>

@@ -1,4 +1,4 @@
-import { alpha, Button, Drawer, IconButton, Stack, Table, TableBody, TableCell, tableCellClasses, TableRow } from '@mui/material'
+import { alpha, Drawer, Stack, Table, TableBody, TableCell, TableRow } from '@mui/material'
 import { SketchPicker } from 'react-color'
 import { ColorItem } from '../types/ColorItem'
 import EyeDropperButton from './EyeDropperButton'
@@ -9,17 +9,14 @@ type Props = {
     presetColors: Array<string>,
 }
 
-
-
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-      backgroundColor: theme.palette.primary.light,
-    //   color: theme.palette.common.white,
-    },
-    [`&.${tableCellClasses.body}`]: {
-      fontSize: 14,
-    },
-  }));
+// const StyledTableCell = styled(TableCell)(({ theme }) => ({
+//     [`&.${tableCellClasses.head}`]: {
+//       backgroundColor: theme.palette.primary.light,
+//     },
+//     [`&.${tableCellClasses.body}`]: {
+//       fontSize: 14,
+//     },
+//   }));
   
   const StyledTableRow = styled(TableRow)(({ theme }) => ({
     '&:nth-of-type(odd)': {
