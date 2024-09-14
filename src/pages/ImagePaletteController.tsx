@@ -2,17 +2,39 @@ import React from 'react'
 import { ImagePalette, RGBAResult } from '../types/ImagePalette';
 import { useNavigate } from 'react-router';
 import ToolDrawer from '../components/ToolDrawer';
-import ViewImagePalette from './ViewImagePalette';
 import { ColorItem } from '../types/ColorItem';
 import { rgbToHex, rgbResultToHex } from '../utils/colorUtils';
 import { PaletteState } from '../types/Palette';
-import { Box } from '@mui/material';
+import { Box, Button, Card, CardActions, CardContent, CardMedia, Container, Grid } from '@mui/material';
 import PaletteAppBar from '../components/PaletteAppBar';
+import PaletteCard from '../components/PaletteCard';
+import TopSwatches from '../components/TopSwatches';
+import { ColorResult } from 'react-color';
+
+
+function componentToHex(c: number): string {
+    var hex = c.toString(16);
+    return hex.length === 1 ? "0" + hex : hex;
+}
+
+function rgbaResultToReactColor(color: RGBAResult): ColorResult{
+    return {
+        hex: rgbResultToHex(color),
+        rgb: { r: color.R, g: color.G, b: color.B, a: color.A },
+        hsl: { h: color.H, s: color.S, l: color.L },
+    }
+}
+
+
+function reactColorToRGBAResult(clr: ColorResult): RGBAResult {
+    return { R: clr.rgb.r, G: clr.rgb.g, B: clr.rgb.b, A: clr.rgb.a || 0, H: clr.hsl.h, S: clr.hsl.s, L: clr.hsl.l || 0, Count: 0 }
+}
+
 
 type Props = {
     file: File | undefined,
     imagePalette: ImagePalette | undefined,
-    setImagePalette: (palette: ImagePalette) => void,
+    // setImagePalette: (palette: ImagePalette) => void,
 }
 
 
@@ -33,7 +55,11 @@ function ImagePaletteController(props: Props) {
 
     const shouldRedirect = !props.file || !props.imagePalette
 
-    const [selectedColor, setSelectedColor] = React.useState<ColorItem | undefined>(undefined)
+    const [selectedColor, _setSelectedColor] = React.useState<ColorItem | undefined>(undefined)
+
+    const [selectedPalette, setSelectedPalette] = React.useState<keyof PaletteState | undefined>()
+
+    const [editingPalette, setEditingPalette] = React.useState<keyof PaletteState | undefined>()
 
     const [palette, setPalette] = React.useState<PaletteState>({
         Primary: props.imagePalette?.Primary!!,
@@ -43,7 +69,21 @@ function ImagePaletteController(props: Props) {
         Fifth: props.imagePalette?.Fifth!!
     })
 
-    const rgbCache = React.useMemo(() => {
+
+    const handleColorChange = (colorItem: ColorItem) => {
+        _setSelectedColor(colorItem)
+        // console.log('Color Change...', colorItem)
+        if (editingPalette && (colorItem.rgbResult || colorItem.reactColor)) {
+            console.log('Updating Palette...', colorItem.rgbResult)
+            console.log('Updating Palette...', editingPalette)
+            setPalette({ ...palette, [editingPalette]: colorItem.rgbResult || reactColorToRGBAResult(colorItem.reactColor!!) })
+            setEditingPalette(undefined)
+            setSelectedPalette(undefined)
+        }
+    }
+
+    // Map lookup of all RGBAResults derived from image keyed by Hex code.
+    const rgbCache: Map<string, RGBAResult> = React.useMemo(() => {
         if (props.imagePalette) {
             const cacheMap = newCacheFromResult([
                 [props.imagePalette.Primary, props.imagePalette.Secondary, props.imagePalette.Tertiary, props.imagePalette.Fourth, props.imagePalette.Fifth],
@@ -73,18 +113,64 @@ function ImagePaletteController(props: Props) {
         }
         {!shouldRedirect
             ? <Box display="flex">
-                <ViewImagePalette
-                    file={props.file!!}
-                    imagePalette={props.imagePalette!!}
-                    palette={palette}
-                    setPaletteState={setPalette}
-                    colorToolOnSelect={setSelectedColor}
-                    rgbCache={rgbCache || new Map()}
-                />
+                <Container sx={{ overflowX: 'hidden' }}>
+                    {palette &&
+                        <Grid sx={{ paddingTop: '1em', paddingBottom: '.2em' }} container spacing={2} justifyContent="center">
+                            {palette &&
+                                Object.keys(palette)
+                                    .map((key: string) => key as keyof PaletteState)
+                                    .map((key: keyof PaletteState) =>
+                                        <Grid key={key} item>
+                                            <PaletteCard
+                                                onSelect={() => setSelectedPalette(selectedPalette === key ? undefined : key)}
+                                                onEdit={() => setEditingPalette(editingPalette === key ? undefined : key)}
+                                                selected={selectedPalette === key}
+                                                editing={editingPalette === key}
+                                                color={rgbResultToHex(palette!![key])}
+                                            />
+                                        </Grid>)
+                            }
+                        </Grid>
+                    }
+                    <Card sx={{
+                        marginTop: 2,
+                        display: 'flex',
+                        flexDirection: 'row',
+                    }}>
+                        {props.file && <CardMedia
+                            sx={{
+                                height: 450,
+                                objectFit: 'contain',
+                                width: '45%',
+                            }}
+                            component="img"
+                            src={URL.createObjectURL(props.file)}
+                            title=""
+                        />
+                        }
+                        <CardContent sx={{ padding: '0px' }}>
+                            {props.imagePalette && <TopSwatches
+                                colorColumns={[props.imagePalette.PrimarySimilar, props.imagePalette.SecondarySimilar, props.imagePalette.TertiarySimilar, props.imagePalette.FourthSimilar, props.imagePalette.FifthSimilar]}  
+                                onClick={(colorResult: ColorResult, _: React.ChangeEvent) => {
+                                    const colorFromImage = rgbCache.get(colorResult.hex)
+                                    handleColorChange({
+                                        hex: colorResult.hex,
+                                        reactColor: colorResult,
+                                        rgbResult: colorFromImage
+                                    })
+                                }}
+                            />}
+                            <CardActions>
+                                <Button variant="contained" size="small">Share</Button>
+                                <Button color="secondary" variant="contained" size="small" onClick={() => navigate('/')}>Upload Another</Button>
+                            </CardActions>
+                        </CardContent>
+                    </Card>
+                </Container>
                 <ToolDrawer
                     color={selectedColor}
-                    colorCount={rgbCache.get(selectedColor?.hex)?.Count}
-                    handleSketchPickerChange={setSelectedColor}
+                    colorCount={rgbCache.get(selectedColor?.hex || '')?.Count}
+                    handleSketchPickerChange={handleColorChange}
                     presetColors={[rgbResultToHex(palette.Primary),
                     rgbResultToHex(palette.Secondary),
                     rgbResultToHex(palette.Tertiary),

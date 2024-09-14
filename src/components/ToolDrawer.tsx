@@ -1,14 +1,39 @@
-import { Button, Drawer, IconButton, Stack, Table, TableBody, TableCell, TableRow } from '@mui/material'
-import React from 'react'
+import { alpha, Button, Drawer, IconButton, Stack, Table, TableBody, TableCell, tableCellClasses, TableRow } from '@mui/material'
 import { SketchPicker } from 'react-color'
 import { ColorItem } from '../types/ColorItem'
 import EyeDropperButton from './EyeDropperButton'
+import { styled } from '@mui/material/styles';
 type Props = {
     handleSketchPickerChange: (color: ColorItem) => void,
     color?: ColorItem,
     colorCount: number | undefined,
     presetColors: Array<string>,
 }
+
+
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+    [`&.${tableCellClasses.head}`]: {
+      backgroundColor: theme.palette.primary.light,
+    //   color: theme.palette.common.white,
+    },
+    [`&.${tableCellClasses.body}`]: {
+      fontSize: 14,
+    },
+  }));
+  
+  const StyledTableRow = styled(TableRow)(({ theme }) => ({
+    '&:nth-of-type(odd)': {
+      backgroundColor: alpha(theme.palette.secondary.light, 0.8),
+    },
+    '&:nth-of-type(even)': {
+        backgroundColor: theme.palette.primary.light,
+      },
+    // hide last border
+    '&:last-child td, &:last-child th': {
+      border: 0,
+    },
+  }));
 
 const drawerWidth = 220
 
@@ -36,28 +61,28 @@ function ToolDrawer(props: Props) {
             />
             <Table>
                 <TableBody>
-                    <TableRow>
+                    <StyledTableRow>
                         <TableCell>
                             <EyeDropperButton onColorSelect={(hex: string) => props.handleSketchPickerChange({ hex: hex })} />
                         </TableCell>
-                        <TableCell />
-                    </TableRow>
-                    {colorCount > 0 ? <TableRow>
+                        <TableCell/>
+                    </StyledTableRow>
+                    {colorCount > 0 ? <StyledTableRow>
                         <TableCell>{colorCount}</TableCell>
                         <TableCell>Occurrances</TableCell>
-                    </TableRow> : <></>}
-                    {props.color?.reactColor ? <><TableRow>
+                    </StyledTableRow> : <></>}
+                    {props.color?.reactColor ? <><StyledTableRow>
                         <TableCell>{props.color?.reactColor?.hsl.h.toFixed(2)}</TableCell>
                         <TableCell>Hue</TableCell>
-                    </TableRow>
-                        <TableRow>
+                    </StyledTableRow>
+                        <StyledTableRow>
                             <TableCell>{props.color?.reactColor?.hsl.s.toFixed(2)}</TableCell>
                             <TableCell>Saturation</TableCell>
-                        </TableRow>
-                        <TableRow>
+                        </StyledTableRow>
+                        <StyledTableRow>
                             <TableCell>{props.color?.reactColor?.hsl.l.toFixed(2)}</TableCell>
                             <TableCell>Luminance</TableCell>
-                        </TableRow></> : <></>}
+                        </StyledTableRow></> : <></>}
                 </TableBody>
             </Table>
         </Stack>

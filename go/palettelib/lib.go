@@ -178,8 +178,6 @@ func GetImagePalette(imgData *image.Image) *ResultColors {
 
 	colorChannel := make(chan []ColorStruct, 5)
 
-	slices.Reverse(sortedColors)
-
 	go GetSimilarColors(result.Primary, sortedColors, &stats, 10, colorChannel)
 	go GetSimilarColors(result.Secondary, sortedColors, &stats, 10, colorChannel)
 	go GetSimilarColors(result.Tertiary, sortedColors, &stats, 10, colorChannel)
@@ -199,7 +197,9 @@ func GetSimilarColors(color ColorStruct, colors []ColorStruct, colorStats *Color
 
 	var similarColors []ColorStruct
 
-	for _, value := range colors {
+	// Dictionary is sorted in descending order so iterating backwards is ideal.
+	for i := len(colors) - 1; i > 0; i-- {
+		value := colors[i]
 		if (value.H > color.H-hueThreshold && value.H < color.H+hueThreshold) &&
 			(value.S > color.S-saturationThreshold && value.S < color.S+saturationThreshold) &&
 			(value.L > color.L-luminanceThreshold && value.L < color.L+luminanceThreshold) {
@@ -218,7 +218,6 @@ func getAccent(colors *[]ColorStruct, otherColors []ColorStruct, colorStats *Col
 	var paletteColor ColorStruct
 
 	for _, value := range *colors {
-		// Compare the current value and see if it is a better candidate.
 
 		if paletteColor == (ColorStruct{}) {
 			paletteColor = value

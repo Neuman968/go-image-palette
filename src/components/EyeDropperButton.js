@@ -1,4 +1,4 @@
-import { IconButton, Tooltip } from "@mui/material";
+import { Button, Tooltip } from "@mui/material";
 import ColorizeIcon from '@mui/icons-material/Colorize';
 
 
@@ -6,8 +6,9 @@ function EyeDropperButton({ onColorSelect }) {
 
     const supported = window.EyeDropper;
 
-    if (supported) {
-        return <IconButton onClick={() => {
+
+    const eyeDropperOnClick = () => {
+        if (supported) {
             const eyeDropper = new window.EyeDropper();
             eyeDropper
                 .open()
@@ -16,15 +17,13 @@ function EyeDropperButton({ onColorSelect }) {
                 })
                 .catch((e) => {
                 });
-        }} color="primary">
-            <ColorizeIcon />
-        </IconButton>
+        }
     }
 
-    return <Tooltip title="Unsupported. Use Chrome or Edge" placement="bottom">
-        <IconButton>
-            <ColorizeIcon />
-        </IconButton>
+    return <Tooltip title={supported ? "Eyedropper" : "Unsupported. Use Chrome or Edge"} placement="bottom">
+        <Button size="small" variant="contained" onClick={eyeDropperOnClick}>
+            <ColorizeIcon fontSize="small"/>
+        </Button>
     </Tooltip>
 
 }

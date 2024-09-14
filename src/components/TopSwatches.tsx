@@ -1,13 +1,18 @@
 import React from 'react'
 import { ColorResult, SwatchesPicker } from 'react-color';
-import { ImagePalette, RGBAResult } from '../types/ImagePalette';
+import { RGBAResult } from '../types/ImagePalette';
 
 
 function toSwatchFormat(arr: Array<RGBAResult>): Array<string> {
     return arr.map((color: RGBAResult) => `rgb(${color.R}, ${color.G}, ${color.B})`)
 }
 
-function TopSwatches({ imagePalette, onClick }: { imagePalette: ImagePalette, onClick: (clr: ColorResult, ev: React.ChangeEvent) => void }) {
+type Props = {
+    colorColumns: Array<Array<RGBAResult>>,
+    onClick: (clr: ColorResult, ev: React.ChangeEvent) => void
+}
+
+function TopSwatches(props: Props) {
 
     const [selected, setSelected] = React.useState<ColorResult | undefined>()
 
@@ -41,10 +46,9 @@ function TopSwatches({ imagePalette, onClick }: { imagePalette: ImagePalette, on
         }}
         onChange={(clr: ColorResult, ev: React.ChangeEvent) => {
             setSelected(clr)
-            onClick(clr, ev)
+            props.onClick(clr, ev)
         }}
         onSwatchHover={(color: ColorResult, event: MouseEvent) => {
-            // console.log(event.target)
             if (event.target instanceof HTMLElement) {
                 event.target.classList.add('selected-swatch')
                 event.target.onmouseleave = (ev) => {
@@ -58,14 +62,7 @@ function TopSwatches({ imagePalette, onClick }: { imagePalette: ImagePalette, on
         height={450}
         width={520}
         color={selected?.hex}
-        colors={[
-            toSwatchFormat(imagePalette.PrimarySimilar),
-            toSwatchFormat(imagePalette.SecondarySimilar),
-            toSwatchFormat(imagePalette.TertiarySimilar),
-            toSwatchFormat(imagePalette.FourthSimilar),
-            toSwatchFormat(imagePalette.FifthSimilar),
-
-        ]} />
+        colors={props.colorColumns.map((column) => toSwatchFormat(column))} />
 }
 
 export default TopSwatches

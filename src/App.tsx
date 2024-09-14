@@ -52,10 +52,10 @@ function App() {
       } else {
       }
       navigate('/view')
-     }).catch((err) => {
-       console.error(err)
-       navigate('/')
-     })
+    }).catch((err) => {
+      console.error(err)
+      navigate('/')
+    })
   }
 
   const theme = React.useMemo(() => createTheme(
@@ -72,13 +72,15 @@ function App() {
   ), [imagePalette])
 
   return <ThemeProvider theme={theme}>
-      <Heading />
-      <Routes>
-        <Route index element={<UploadPhotoDisplay setFile={setFileAndProcess} />} />
-        <Route path="/examples" element={<></>} />
-        <Route path="/loading" element={<LoadingPage/>} />
-        <Route path="/view" element={<ImagePaletteController file={file!!} imagePalette={imagePalette!!} setImagePalette={setImagePalette} />} />
-      </Routes>
+    <Heading />
+    <Routes>
+      <Route index element={<UploadPhotoDisplay setFile={setFileAndProcess} />} />
+      <Route path="/examples" element={<></>} />
+      <Route path="/loading" element={<LoadingPage />} />
+      <Route path="/view" element={<ImagePaletteController file={file!!} imagePalette={imagePalette!!}
+        // setImagePalette={setImagePalette}
+      />} />
+    </Routes>
   </ThemeProvider>
 
 }
