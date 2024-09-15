@@ -1,10 +1,13 @@
-import { alpha, Drawer, Stack, Table, TableBody, TableCell, TableRow } from '@mui/material'
+import { alpha, Button, Drawer, Stack, Table, TableBody, TableCell, TableRow, Tooltip } from '@mui/material'
 import { SketchPicker } from 'react-color'
 import { ColorItem } from '../types/ColorItem'
 import EyeDropperButton from './EyeDropperButton'
 import { styled } from '@mui/material/styles';
+import { Refresh } from '@mui/icons-material';
+
 type Props = {
     handleSketchPickerChange: (color: ColorItem) => void,
+    handlePaletteReset: () => void,
     color?: ColorItem,
     presetColors: Array<string>,
 }
@@ -17,19 +20,19 @@ type Props = {
 //       fontSize: 14,
 //     },
 //   }));
-  
-  const StyledTableRow = styled(TableRow)(({ theme }) => ({
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
     '&:nth-of-type(odd)': {
-      backgroundColor: alpha(theme.palette.secondary.light, 0.8),
+        backgroundColor: alpha(theme.palette.secondary.light, 0.8),
     },
     '&:nth-of-type(even)': {
         backgroundColor: theme.palette.primary.light,
-      },
+    },
     // hide last border
     '&:last-child td, &:last-child th': {
-      border: 0,
+        border: 0,
     },
-  }));
+}));
 
 const drawerWidth = 220
 
@@ -63,7 +66,17 @@ function ToolDrawer(props: Props) {
                         <TableCell>
                             <EyeDropperButton onColorSelect={(hex: string) => props.handleSketchPickerChange({ hex: hex })} />
                         </TableCell>
-                        <TableCell/>
+                        <TableCell>
+                            <Tooltip title="Reset Palette">
+                                <Button
+                                    variant="contained"
+                                    size="small"
+                                    onClick={props.handlePaletteReset}
+                                >
+                                    <Refresh fontSize="small" />
+                                </Button>
+                            </Tooltip>
+                        </TableCell>
                     </StyledTableRow>
                     {colorCount > 0 ? <StyledTableRow>
                         <TableCell>{colorCount}</TableCell>
