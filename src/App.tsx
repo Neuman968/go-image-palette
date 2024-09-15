@@ -5,7 +5,7 @@ import Toolbar from '@mui/material/Toolbar';
 import { ImagePalette } from './types/ImagePalette';
 import { IconButton, Typography } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { rgbResultToHex } from './utils/colorUtils';
+import { getPaletteStateFromImage, rgbResultToHex } from './utils/colorUtils';
 import { ReactComponent as Logo } from './assets/logo.svg'
 import UploadPhotoDisplay from './components/UploadPhotoDisplay';
 import { Routes, Route, useNavigate } from "react-router-dom";
@@ -14,6 +14,7 @@ import { useLoadedWasm } from './context/LoadedWasm';
 import ImagePaletteController from './pages/ImagePaletteController';
 import LoadingPage from './pages/LoadingPage';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import { PaletteState } from './types/Palette';
 
 function Heading() {
   return <Box>
@@ -27,7 +28,7 @@ function Heading() {
           <IconButton onClick={() => {
             window.location.href = "https://github.com/Neuman968/go-image-palette"
           }}>
-            <GitHubIcon sx={{ color: 'white' }}/>
+            <GitHubIcon sx={{ color: 'white' }} />
           </IconButton>
         </Box>
       </Toolbar>
@@ -43,6 +44,8 @@ function App() {
 
   const [imagePalette, setImagePalette] = React.useState<ImagePalette>()
 
+  const [palette, setPalette] = React.useState<PaletteState | undefined>()
+
   const [file, setFile] = React.useState<File>()
 
   const loadedWasm = useLoadedWasm<GoWasmBinding>()
@@ -57,6 +60,7 @@ function App() {
       if (resultJson) {
         const iamgePaletteResp = JSON.parse(resultJson)
         setImagePalette(iamgePaletteResp)
+        setPalette(getPaletteStateFromImage(iamgePaletteResp))
       } else {
       }
       navigate('/view')
@@ -68,16 +72,16 @@ function App() {
 
   const theme = React.useMemo(() => createTheme(
     {
-      palette: imagePalette ? {
+      palette: palette ? {
         primary: {
-          main: rgbResultToHex(imagePalette?.Primary),
+          main: rgbResultToHex(palette?.Primary),
         },
         secondary: {
-          main: rgbResultToHex(imagePalette?.Secondary),
+          main: rgbResultToHex(palette?.Secondary),
         }
       } : defaultPalette,
     }
-  ), [imagePalette])
+  ), [palette])
 
   return <ThemeProvider theme={theme}>
     <Heading />
@@ -86,6 +90,8 @@ function App() {
       <Route path="/examples" element={<></>} />
       <Route path="/loading" element={<LoadingPage />} />
       <Route path="/view" element={<ImagePaletteController file={file!!} imagePalette={imagePalette!!}
+        paletteState={palette}
+        setPalette={setPalette}
       // setImagePalette={setImagePalette}
       />} />
     </Routes>

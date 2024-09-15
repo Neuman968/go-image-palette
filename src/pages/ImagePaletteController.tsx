@@ -3,7 +3,7 @@ import { ImagePalette, RGBAResult } from '../types/ImagePalette';
 import { useNavigate } from 'react-router';
 import ToolDrawer from '../components/ToolDrawer';
 import { ColorItem } from '../types/ColorItem';
-import { rgbToHex, rgbResultToHex } from '../utils/colorUtils';
+import { rgbToHex, rgbResultToHex, getPaletteStateFromImage } from '../utils/colorUtils';
 import { PaletteState } from '../types/Palette';
 import { Box, Button, Card, CardActions, CardContent, CardMedia, Container, Grid } from '@mui/material';
 import PaletteAppBar from '../components/PaletteAppBar';
@@ -39,6 +39,8 @@ function hexToColorResult(hex: string): ColorResult {
 type Props = {
     file: File | undefined,
     imagePalette: ImagePalette | undefined,
+    paletteState: PaletteState | undefined,
+    setPalette: (palette: PaletteState) => void,
 }
 
 
@@ -54,20 +56,10 @@ const newCacheFromResult = (arr: Array<Array<RGBAResult>>): Map<string, RGBAResu
     return newCache
 }
 
-const getPaletteStateFromImage = (imagePalette: ImagePalette): PaletteState => { 
-    return  {
-        Primary: imagePalette.Primary,
-        Secondary: imagePalette.Secondary,
-        Tertiary: imagePalette.Tertiary,
-        Fourth: imagePalette.Fourth,
-        Fifth: imagePalette.Fifth
-    }
-}
-
 function ImagePaletteController(props: Props) {
     const navigate = useNavigate()
 
-    const shouldRedirect = !props.file || !props.imagePalette
+    const shouldRedirect = !props.file || !props.imagePalette || !props.paletteState
 
     const [selectedColor, _setSelectedColor] = React.useState<ColorItem | undefined>(undefined)
 
@@ -75,12 +67,11 @@ function ImagePaletteController(props: Props) {
 
     const [editingPalette, setEditingPalette] = React.useState<keyof PaletteState | undefined>()
 
-    const [palette, setPalette] = React.useState<PaletteState>(getPaletteStateFromImage(props.imagePalette!!))
-
     // Redirect if the /view page is viewed without processing a file image.
     if (shouldRedirect) {
         navigate('/')
     }
+    const palette = props.paletteState!!
 
     const handleColorChange = (_colorItem: ColorItem) => {
 
@@ -96,7 +87,7 @@ function ImagePaletteController(props: Props) {
 
         _setSelectedColor(colorItem)
         if (editingPalette) {
-            setPalette({ ...palette, [editingPalette]: colorItem.rgbResult || reactColorToRGBAResult(colorItem.reactColor!!) })
+            props.setPalette({ ...palette, [editingPalette]: colorItem.rgbResult || reactColorToRGBAResult(colorItem.reactColor!!) })
             setEditingPalette(undefined)
             _setSelectedPalette(undefined)
         }
@@ -114,7 +105,7 @@ function ImagePaletteController(props: Props) {
         }
     }
 
-    const handlePaletteReset = () => setPalette(getPaletteStateFromImage(props.imagePalette!!))
+    const handlePaletteReset = () => props.setPalette(getPaletteStateFromImage(props.imagePalette!!))
 
     // Map lookup of all RGBAResults derived from image keyed by Hex code.
     const rgbCache: Map<string, RGBAResult> = React.useMemo(() => {
@@ -133,11 +124,11 @@ function ImagePaletteController(props: Props) {
             props.imagePalette &&
             <PaletteAppBar
                 colorHexes={
-                    [rgbResultToHex(props.imagePalette.Primary),
-                    rgbResultToHex(props.imagePalette.Secondary),
-                    rgbResultToHex(props.imagePalette.Tertiary),
-                    rgbResultToHex(props.imagePalette.Fourth),
-                    rgbResultToHex(props.imagePalette.Fifth)]
+                    [rgbResultToHex(palette.Primary),
+                    rgbResultToHex(palette.Secondary),
+                    rgbResultToHex(palette.Tertiary),
+                    rgbResultToHex(palette.Fourth),
+                    rgbResultToHex(palette.Fifth)]
                 }
             />
         }

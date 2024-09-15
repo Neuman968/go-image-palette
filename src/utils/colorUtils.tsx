@@ -1,4 +1,5 @@
-import { RGBAResult } from '../types/ImagePalette'
+import { ImagePalette, RGBAResult } from '../types/ImagePalette'
+import { PaletteState } from '../types/Palette';
 
 export function componentToHex(c: number): string {
     var hex = c.toString(16);
@@ -11,6 +12,16 @@ export function rgbToHex(r: number, g: number, b: number): string {
 
 export function rgbResultToHex(clrResult: RGBAResult): string {
     return rgbToHex(clrResult.R, clrResult.G, clrResult.B)
+}
+
+export const getPaletteStateFromImage = (imagePalette: ImagePalette): PaletteState => { 
+    return  {
+        Primary: imagePalette.Primary,
+        Secondary: imagePalette.Secondary,
+        Tertiary: imagePalette.Tertiary,
+        Fourth: imagePalette.Fourth,
+        Fifth: imagePalette.Fifth
+    }
 }
 
 /*
