@@ -16,9 +16,11 @@ export function WasmProvider (props: ProviderProps & React.PropsWithChildren) {
         const load = async () => {
             const source = await WebAssembly.instantiateStreaming(fetch(props.fetchParams, props.init), go.importObject)
             setWasm(window)
+            console.log("WASM loaded")
             await go.run(source.instance)
         }
         load().catch((e) => {
+            console.log("Failed to load WASM", e)
             props?.onFailure?.(e)
         })
     }, [ props ])

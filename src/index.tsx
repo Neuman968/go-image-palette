@@ -4,17 +4,17 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { WasmProvider } from './context/LoadedWasm';
-import { BrowserRouter } from "react-router-dom";
+import { HashRouter } from "react-router-dom";
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <WasmProvider fetchParams="go-wasm.wasm">
-      <BrowserRouter>
+    <WasmProvider onFailure={(e) => console.error("Failed to load WASM ", e)} fetchParams="go-wasm.wasm">
+      <HashRouter>
         <App />
-      </BrowserRouter>
+      </HashRouter>
     </WasmProvider>
   </React.StrictMode>
 );

@@ -54,7 +54,6 @@ function App() {
 
   const setFileAndProcess = (file: File) => {
     setFile(file)
-    navigate('/loading')
     file.arrayBuffer().then((arr: ArrayBuffer) => {
       const resultJson = loadedWasm?.GetJsonForImage(new Uint8Array(arr))
       if (resultJson) {
@@ -94,6 +93,7 @@ function App() {
         setPalette={setPalette}
       // setImagePalette={setImagePalette}
       />} />
+      <Route path="*" element={<UploadPhotoDisplay setFile={setFileAndProcess} />} />
     </Routes>
   </ThemeProvider>
 
