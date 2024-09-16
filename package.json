@@ -1,5 +1,6 @@
 {
-  "name": "web-image-palette",
+  "homepage": "https://neuman968.github.io",
+  "name": "go-image-palette",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -25,6 +26,8 @@
     "web-vitals": "^2.1.0"
   },
   "scripts": {
+    "predeploy": "yarn run build",
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
@@ -51,6 +54,7 @@
   "devDependencies": {
     "@types/golang-wasm": "^1.15.0",
     "@types/react-color": "^3.0.6",
-    "@types/tinycolor2": "^1.4.6"
+    "@types/tinycolor2": "^1.4.6",
+    "gh-pages": "^6.1.1"
   }
 }
