@@ -56,7 +56,7 @@ const newCacheFromResult = (arr: Array<Array<RGBAResult>>): Map<string, RGBAResu
     return newCache
 }
 
-function ImagePaletteController(props: Props) {
+function ImagePalettePage(props: Props) {
     const navigate = useNavigate()
 
     const shouldRedirect = !props.file || !props.imagePalette || !props.paletteState
@@ -204,4 +204,4 @@ function ImagePaletteController(props: Props) {
     </React.Fragment>
 }
 
-export default ImagePaletteController;
+export default ImagePalettePage;

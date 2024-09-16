@@ -11,7 +11,7 @@ import UploadPhotoDisplay from './components/UploadPhotoDisplay';
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { defaultPalette } from './types/DefaultPaletteOptions'
 import { useLoadedWasm } from './context/LoadedWasm';
-import ImagePaletteController from './pages/ImagePaletteController';
+import ImagePalettePage from './pages/ImagePalettePage';
 import LoadingPage from './pages/LoadingPage';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { PaletteState } from './types/Palette';
@@ -88,7 +88,7 @@ function App() {
       <Route index element={<UploadPhotoDisplay setFile={setFileAndProcess} />} />
       <Route path="/examples" element={<></>} />
       <Route path="/loading" element={<LoadingPage />} />
-      <Route path="/view" element={<ImagePaletteController file={file!!} imagePalette={imagePalette!!}
+      <Route path="/view" element={<ImagePalettePage file={file!!} imagePalette={imagePalette!!}
         paletteState={palette}
         setPalette={setPalette}
       // setImagePalette={setImagePalette}
