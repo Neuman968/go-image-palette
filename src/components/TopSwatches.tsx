@@ -60,7 +60,6 @@ function TopSwatches(props: Props) {
             }
         }}
         height={450}
-        width={520}
         color={selected?.hex}
         colors={props.colorColumns.map((column) => toSwatchFormat(column))} />
 }

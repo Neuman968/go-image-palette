@@ -157,6 +157,7 @@ function ImagePalettePage(props: Props) {
                         marginTop: 2,
                         display: 'flex',
                         flexDirection: 'row',
+                        justifyContent: 'center',
                     }}>
                         {props.file && <CardMedia
                             sx={{
