@@ -13,10 +13,10 @@ func main() {
 	var numberOfColors = flag.Int("n", 10, "-n <number-of-colors>")
 	var numberOfTopDistincts = flag.Int("d", 3, "-d <distinct-colors>")
 	flag.Parse()
-	imgData, err := palettelib.GetImageFromFile(imgFileName)
+	imgData, err := palettelib.ImageFromFile(imgFileName)
 	if err != nil {
 		log.Fatal(err)
 	} else {
-		fmt.Print(palettelib.GetJsonForImage(imgData, *numberOfColors, *numberOfTopDistincts))
+		fmt.Print(palettelib.JsonForImage(imgData, *numberOfColors, *numberOfTopDistincts))
 	}
 }

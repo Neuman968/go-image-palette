@@ -37,7 +37,7 @@ function Heading() {
 }
 
 type GoWasmBinding = {
-  GetJsonForImage: (byteArr: Uint8Array) => string
+  PaletteFromImage: (byteArr: Uint8Array) => string
 }
 
 function App() {
@@ -55,7 +55,7 @@ function App() {
   const setFileAndProcess = (file: File) => {
     setFile(file)
     file.arrayBuffer().then((arr: ArrayBuffer) => {
-      const resultJson = loadedWasm?.GetJsonForImage(new Uint8Array(arr))
+      const resultJson = loadedWasm?.PaletteFromImage(new Uint8Array(arr))
       if (resultJson) {
         const iamgePaletteResp = JSON.parse(resultJson)
         setImagePalette(iamgePaletteResp)

@@ -77,7 +77,7 @@ type ResultColors struct {
 	FifthSimilar []ColorStruct
 }
 
-func GetImageFromFile(imgFileName *string) (*image.Image, error) {
+func ImageFromFile(imgFileName *string) (*image.Image, error) {
 	imgFile, err := os.Open(*imgFileName)
 	if err != nil {
 		return nil, err
@@ -89,15 +89,24 @@ func GetImageFromFile(imgFileName *string) (*image.Image, error) {
 	return &imgData, nil
 }
 
-func GetJsonImageForBytes(imgByte []byte, numberOfColors int, numberOfTopDistincts int) string {
+func JsonImageFromImageBytes(imgByte []byte, numberOfColors int, numberOfTopDistincts int) string {
 	img, _, err := image.Decode(bytes.NewReader(imgByte))
 	if err != nil {
 		log.Fatal(err)
 	}
-	return GetJsonForImage(&img, numberOfColors, numberOfTopDistincts)
+	return JsonForImage(&img, numberOfColors, numberOfTopDistincts)
 }
 
-func getColorMap(imgData *image.Image) ColorStats {
+func JsonForImage(imgData *image.Image, numberOfColors int, numberOfTopDistincts int) string {
+
+	result := ImagePalette(imgData)
+
+	binary, _ := json.Marshal(result)
+	// // todo handle json marshal error.
+	return string(binary)
+}
+
+func colorStatsFromImage(imgData *image.Image) ColorStats {
 
 	var largest ColorStruct
 
@@ -122,7 +131,7 @@ func getColorMap(imgData *image.Image) ColorStats {
 				colorStruct.Count = colorStruct.Count + 1
 			} else {
 				colorStruct = newColorStruct(colr)
-				totalDistance += getRgbDistance(colorStruct.rgba, color.RGBA{R: 255 / 2, G: 255 / 2, B: 255 / 2})
+				totalDistance += RGBDistance(colorStruct.rgba, color.RGBA{R: 255 / 2, G: 255 / 2, B: 255 / 2})
 
 				totalHue += colorStruct.H
 				totalSaturation += colorStruct.S
@@ -149,8 +158,8 @@ func getColorMap(imgData *image.Image) ColorStats {
 	}
 }
 
-func GetImagePalette(imgData *image.Image) *ResultColors {
-	stats := getColorMap(imgData)
+func ImagePalette(imgData *image.Image) *ResultColors {
+	stats := colorStatsFromImage(imgData)
 
 	largest := stats.largest
 
@@ -170,19 +179,19 @@ func GetImagePalette(imgData *image.Image) *ResultColors {
 		)
 	})
 
-	result.Primary = getAccent(&sortedColors, []ColorStruct{}, &stats)
-	result.Secondary = getAccent(&sortedColors, []ColorStruct{result.Primary}, &stats)
-	result.Tertiary = getAccent(&sortedColors, []ColorStruct{result.Primary, result.Secondary}, &stats)
-	result.Fourth = getAccent(&sortedColors, []ColorStruct{result.Primary, result.Secondary, result.Tertiary}, &stats)
-	result.Fifth = getAccent(&sortedColors, []ColorStruct{result.Primary, result.Secondary, result.Tertiary, result.Fourth}, &stats)
+	result.Primary = Accent(&sortedColors, []ColorStruct{}, &stats)
+	result.Secondary = Accent(&sortedColors, []ColorStruct{result.Primary}, &stats)
+	result.Tertiary = Accent(&sortedColors, []ColorStruct{result.Primary, result.Secondary}, &stats)
+	result.Fourth = Accent(&sortedColors, []ColorStruct{result.Primary, result.Secondary, result.Tertiary}, &stats)
+	result.Fifth = Accent(&sortedColors, []ColorStruct{result.Primary, result.Secondary, result.Tertiary, result.Fourth}, &stats)
 
 	colorChannel := make(chan []ColorStruct, 5)
 
-	go GetSimilarColors(result.Primary, sortedColors, &stats, 10, colorChannel)
-	go GetSimilarColors(result.Secondary, sortedColors, &stats, 10, colorChannel)
-	go GetSimilarColors(result.Tertiary, sortedColors, &stats, 10, colorChannel)
-	go GetSimilarColors(result.Fourth, sortedColors, &stats, 10, colorChannel)
-	go GetSimilarColors(result.Fifth, sortedColors, &stats, 10, colorChannel)
+	go SimilarColors(result.Primary, sortedColors, &stats, 10, colorChannel)
+	go SimilarColors(result.Secondary, sortedColors, &stats, 10, colorChannel)
+	go SimilarColors(result.Tertiary, sortedColors, &stats, 10, colorChannel)
+	go SimilarColors(result.Fourth, sortedColors, &stats, 10, colorChannel)
+	go SimilarColors(result.Fifth, sortedColors, &stats, 10, colorChannel)
 
 	result.PrimarySimilar = <-colorChannel
 	result.SecondarySimilar = <-colorChannel
@@ -193,7 +202,7 @@ func GetImagePalette(imgData *image.Image) *ResultColors {
 	return result
 }
 
-func GetSimilarColors(color ColorStruct, colors []ColorStruct, colorStats *ColorStats, size int, c chan<- []ColorStruct) {
+func SimilarColors(color ColorStruct, colors []ColorStruct, colorStats *ColorStats, size int, c chan<- []ColorStruct) {
 
 	var similarColors []ColorStruct
 
@@ -213,7 +222,7 @@ func GetSimilarColors(color ColorStruct, colors []ColorStruct, colorStats *Color
 	c <- similarColors
 }
 
-func getAccent(colors *[]ColorStruct, otherColors []ColorStruct, colorStats *ColorStats) ColorStruct {
+func Accent(colors *[]ColorStruct, otherColors []ColorStruct, colorStats *ColorStats) ColorStruct {
 
 	var paletteColor ColorStruct
 
@@ -224,8 +233,8 @@ func getAccent(colors *[]ColorStruct, otherColors []ColorStruct, colorStats *Col
 			continue
 		}
 
-		scorePrevious := getScore(paletteColor, otherColors, colorStats)
-		scoreCurrent := getScore(value, otherColors, colorStats)
+		scorePrevious := colorScore(paletteColor, otherColors, colorStats)
+		scoreCurrent := colorScore(value, otherColors, colorStats)
 
 		if scoreCurrent >= scorePrevious ||
 			(scorePrevious == scoreCurrent && value.Count > paletteColor.Count) {
@@ -240,11 +249,11 @@ func getAccent(colors *[]ColorStruct, otherColors []ColorStruct, colorStats *Col
 	return paletteColor
 }
 
-func getScore(colorStruct ColorStruct, otherColors []ColorStruct, colorStats *ColorStats) (score int) {
+func colorScore(colorStruct ColorStruct, otherColors []ColorStruct, colorStats *ColorStats) (score int) {
 	score += addScore(isDistanceThresholdFromColors(colorStruct, &otherColors, colorStats.averageColorDistance), 2)
 	score += addScore(isAlreadyUsed(colorStruct, otherColors), -1)
-	score += addScore(getRgbDistance(colorStruct.rgba, color.RGBA{R: 255, G: 255, B: 255}) < colorStats.averageColorDistance, -1)
-	score += addScore(getRgbDistance(colorStruct.rgba, color.RGBA{R: 0, G: 0, B: 0}) < colorStats.averageColorDistance, -1)
+	score += addScore(RGBDistance(colorStruct.rgba, color.RGBA{R: 255, G: 255, B: 255}) < colorStats.averageColorDistance, -1)
+	score += addScore(RGBDistance(colorStruct.rgba, color.RGBA{R: 0, G: 0, B: 0}) < colorStats.averageColorDistance, -1)
 	score += addScore((float64(colorStruct.Count)/float64(colorStats.totalPixels) < 0.20), -1)
 	return
 }
@@ -265,15 +274,6 @@ func addScore(isTrue bool, score int) int {
 	return 0
 }
 
-func GetJsonForImage(imgData *image.Image, numberOfColors int, numberOfTopDistincts int) string {
-
-	result := GetImagePalette(imgData)
-
-	binary, _ := json.Marshal(result)
-	// // todo handle json marshal error.
-	return string(binary)
-}
-
 /*
 M = max{R, G, B}
 m = min{R, G, B}
@@ -287,7 +287,7 @@ https://www.had2know.org/technology/hsl-rgb-color-converter.html
 © 2010-2023 had2know.org
 */
 
-func GetHSL(r, g, b uint8) (float64, float64, float64) {
+func HSL(r, g, b uint8) (float64, float64, float64) {
 	rPercent := float64(r) / 255
 	gPercent := float64(g) / 255
 	bPercent := float64(b) / 255
@@ -325,7 +325,7 @@ func GetHSL(r, g, b uint8) (float64, float64, float64) {
 func isDistanceThresholdFromColors(color ColorStruct, previousColors *[]ColorStruct,
 	averageDistance float64) bool {
 	for _, value := range *previousColors {
-		if getRgbDistance(value.rgba, color.rgba) <= averageDistance {
+		if RGBDistance(value.rgba, color.rgba) <= averageDistance {
 			return false
 		}
 	}
@@ -343,7 +343,7 @@ func newColorStruct(colorVal color.Color) ColorStruct {
 	colorStruct.B = colorStruct.rgba.B
 	colorStruct.A = colorStruct.rgba.A
 
-	h, s, l := GetHSL(colorStruct.R, colorStruct.G, colorStruct.B)
+	h, s, l := HSL(colorStruct.R, colorStruct.G, colorStruct.B)
 
 	colorStruct.H = h
 	colorStruct.S = s
@@ -353,7 +353,7 @@ func newColorStruct(colorVal color.Color) ColorStruct {
 }
 
 // Calculate the distance between two colors as if they were points in a 3D space.
-func getRgbDistance(rgb1, rgb2 color.RGBA) float64 {
+func RGBDistance(rgb1, rgb2 color.RGBA) float64 {
 	return math.Sqrt(math.Pow(float64(rgb2.R)-float64(rgb1.R), 2) +
 		math.Pow(float64(rgb2.G)-float64(rgb1.G), 2) + math.Pow(float64(rgb2.B)-float64(rgb1.B), 2))
 }

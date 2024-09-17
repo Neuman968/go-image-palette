@@ -19,7 +19,7 @@ var rgbToHSLTest = []struct {
 func TestHSLConversion(t *testing.T) {
 	for _, tt := range rgbToHSLTest {
 		t.Run(fmt.Sprintf("R: %d G: %d B: %d", tt.in.r, tt.in.g, tt.in.b), func(t *testing.T) {
-			h, s, l := GetHSL(tt.in.r, tt.in.g, tt.in.b)
+			h, s, l := HSL(tt.in.r, tt.in.g, tt.in.b)
 			if h != tt.out.h || s != tt.out.s || l != tt.out.l {
 				// t.Errorf("%v %v %v", h != tt.out.h, s != tt.out.s, l != tt.out.l)
 				t.Errorf("got %f %f %f, want %f %f %f", h, s, l, tt.out.h, tt.out.s, tt.out.l)
@@ -34,7 +34,7 @@ func Test_testRGBDistance_Expecting3dPointDistance(t *testing.T) {
 	// 10.246951
 	p1 := color.RGBA{R: 7, G: 4, B: 3}
 	p2 := color.RGBA{R: 17, G: 6, B: 2}
-	result := getRgbDistance(p1, p2)
+	result := RGBDistance(p1, p2)
 	resultStr := fmt.Sprint(result)
 	expectStr := fmt.Sprint(10.246950765959598)
 	if resultStr != expectStr {
@@ -48,22 +48,22 @@ var testImagePaletteTest = []struct {
 }{
 	{"../test-images/picpalette-logo2.png",
 		ResultColors{
-			Primary: ColorStruct{R: 188, G: 178, B: 180, A: 255, H: 348, S: 0.069, L: 0.718, Count: 27743},
+			Primary:   ColorStruct{R: 188, G: 178, B: 180, A: 255, H: 348, S: 0.069, L: 0.718, Count: 27743},
 			Secondary: ColorStruct{R: 104, G: 5, B: 249, A: 255, H: 264.344, S: 0.961, L: 0.498, Count: 48},
-			Tertiary: ColorStruct{R: 9, G: 199, B: 244, A: 255, H: 191.489, S: 0.929, L: 0.496, Count: 48},
-			Fourth: ColorStruct{R: 254, G: 1, B: 115, A: 255, H: 332.964, S: 0.992, L: 0.5, Count: 43},
-			Fifth: ColorStruct{R: 0, G: 0, B: 0, A: 0, H: 0, S: 0, L: 0, Count: 6402},
+			Tertiary:  ColorStruct{R: 9, G: 199, B: 244, A: 255, H: 191.489, S: 0.929, L: 0.496, Count: 48},
+			Fourth:    ColorStruct{R: 254, G: 1, B: 115, A: 255, H: 332.964, S: 0.992, L: 0.5, Count: 43},
+			Fifth:     ColorStruct{R: 0, G: 0, B: 0, A: 0, H: 0, S: 0, L: 0, Count: 6402},
 		}},
 }
 
 func Test_ImagePaletteTable(t *testing.T) {
 	for _, tt := range testImagePaletteTest {
 		t.Run(tt.in, func(t *testing.T) {
-			imageData, err := GetImageFromFile(&tt.in)
+			imageData, err := ImageFromFile(&tt.in)
 			if err != nil {
 				t.Errorf("Error loading image %s", err)
 			}
-			result := GetImagePalette(imageData)
+			result := ImagePalette(imageData)
 			colorStructAssert(t, result.Primary, tt.out.Primary)
 			colorStructAssert(t, result.Secondary, tt.out.Secondary)
 			colorStructAssert(t, result.Tertiary, tt.out.Tertiary)
