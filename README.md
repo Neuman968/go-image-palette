@@ -12,12 +12,8 @@ cd into the `go` directory in this project.
 Build the wasm binary using the following command
 
 ```bash
-GOOS=js GOARCH=wasm go build -o main.wasm
+GOOS=js GOARCH=wasm go build -o ../public/go-wasm.wasm
 ```
 
-Next, copy the resulting `main.wasm` file into the public directory of the react app.
-(From the go folder)
+This will move the compiiled wasm binary to the public folder of the React project in the parent folder.
 
-```bash
-cp main.wasm ../public/go-wasm.wasm
-```
