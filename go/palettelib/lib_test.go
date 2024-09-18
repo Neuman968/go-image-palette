@@ -21,7 +21,6 @@ func TestHSLConversion(t *testing.T) {
 		t.Run(fmt.Sprintf("R: %d G: %d B: %d", tt.in.r, tt.in.g, tt.in.b), func(t *testing.T) {
 			h, s, l := HSL(tt.in.r, tt.in.g, tt.in.b)
 			if h != tt.out.h || s != tt.out.s || l != tt.out.l {
-				// t.Errorf("%v %v %v", h != tt.out.h, s != tt.out.s, l != tt.out.l)
 				t.Errorf("got %f %f %f, want %f %f %f", h, s, l, tt.out.h, tt.out.s, tt.out.l)
 			}
 		})
@@ -29,9 +28,6 @@ func TestHSLConversion(t *testing.T) {
 }
 
 func Test_testRGBDistance_Expecting3dPointDistance(t *testing.T) {
-	//7,4,3
-	// 17,6,2
-	// 10.246951
 	p1 := color.RGBA{R: 7, G: 4, B: 3}
 	p2 := color.RGBA{R: 17, G: 6, B: 2}
 	result := RGBDistance(p1, p2)
@@ -78,36 +74,3 @@ func colorStructAssert(t *testing.T, result ColorStruct, expected ColorStruct) {
 		t.Errorf("Color was not correct. Expected: %v Was: %v", expected, result)
 	}
 }
-
-// func Test_ImagePalette(t *testing.T) {
-
-// 	fileName := "../test-images/picpalette-logo2.png"
-
-// 	imageData, err := GetImageFromFile(&fileName)
-
-// 	if err != nil {
-// 		t.Errorf("Error loading image %s", err)
-// 	}
-
-// 	result := GetImagePalette(imageData)
-
-// 	if result.Primary.R != 188 && result.Primary.G != 178 && result.Primary.B != 180 {
-// 		t.Errorf("Primary color was not correct, was %v", result.Primary)
-// 	}
-
-// 	if result.Secondary.R != 0 && result.Secondary.G != 0 && result.Secondary.B != 0 {
-// 		t.Errorf("Secondary color was not correct, was %v", result.Secondary)
-// 	}
-
-// 	if result.Tertiary.R != 99 && result.Tertiary.G != 5 && result.Tertiary.B != 249 {
-// 		t.Errorf("Tertiary color was not correct, was %v", result.Tertiary)
-// 	}
-
-// 	if result.Fourth.R != 9 && result.Fourth.G != 199 && result.Fourth.B != 244 {
-// 		t.Errorf("Fourth color was not correct, was %v", result.Fourth)
-// 	}
-
-// 	if result.Fifth.R != 253 && result.Fifth.G != 2 && result.Fifth.B != 180 {
-// 		t.Errorf("Fifth color was not correct, was %v", result.Fifth)
-// 	}
-// }
