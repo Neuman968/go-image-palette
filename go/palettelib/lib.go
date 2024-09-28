@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"cmp"
 	"encoding/json"
+	"fmt"
 	"image"
 	"image/color"
 	_ "image/jpeg"
@@ -92,7 +93,8 @@ func ImageFromFile(imgFileName *string) (*image.Image, error) {
 func JsonImageFromImageBytes(imgByte []byte, numberOfColors int, numberOfTopDistincts int) string {
 	img, _, err := image.Decode(bytes.NewReader(imgByte))
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error decoding image %s \n", err)
+		return fmt.Sprintf(`{"Error": "Error: %s"}`, err)
 	}
 	return JsonForImage(&img, numberOfColors, numberOfTopDistincts)
 }

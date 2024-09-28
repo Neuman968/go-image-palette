@@ -15,6 +15,7 @@ import ImagePalettePage from './pages/ImagePalettePage';
 import LoadingPage from './pages/LoadingPage';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { PaletteState } from './types/Palette';
+import { useNotifications } from '@toolpad/core';
 
 function Heading() {
   return <Box>
@@ -52,20 +53,32 @@ function App() {
 
   const navigate = useNavigate()
 
+  const notifications = useNotifications()
+
   const setFileAndProcess = (file: File) => {
     setFile(file)
     file.arrayBuffer().then((arr: ArrayBuffer) => {
       const resultJson = loadedWasm?.PaletteFromImage(new Uint8Array(arr))
       if (resultJson) {
-        const iamgePaletteResp = JSON.parse(resultJson)
-        setImagePalette(iamgePaletteResp)
-        setPalette(getPaletteStateFromImage(iamgePaletteResp))
+        const imagePaletteResp = JSON.parse(resultJson)
+        if (imagePaletteResp.Error) {
+          notifications.show(`Error Loading Image ${imagePaletteResp.Error}`, {
+            severity: 'error',
+            autoHideDuration: 3000,
+          });
+          return
+        }
+        setImagePalette(imagePaletteResp)
+        setPalette(getPaletteStateFromImage(imagePaletteResp))
       } else {
       }
       navigate('/view')
     }).catch((err) => {
+      notifications.show(`Error Loading Image ${err}`, {
+        severity: 'error',
+        autoHideDuration: 3000,
+      });
       console.error(err)
-      navigate('/')
     })
   }
 

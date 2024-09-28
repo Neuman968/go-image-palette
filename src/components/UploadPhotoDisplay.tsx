@@ -22,6 +22,7 @@ function UploadPhotoDisplay(props: Props) {
                                 style={{ display: "none" }}
                                 id="contained-button-file"
                                 type="file"
+                                accept='image/png, image/jpeg'
                                 onChange={(ev: React.ChangeEvent<HTMLInputElement>) => {
                                     const file = ev.target?.files?.[0]
                                     if (file) {

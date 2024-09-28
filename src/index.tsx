@@ -5,17 +5,20 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { WasmProvider } from './context/LoadedWasm';
 import { HashRouter } from "react-router-dom";
+import { NotificationsProvider } from '@toolpad/core';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <WasmProvider onFailure={(e) => console.error("Failed to load WASM ", e)} fetchParams="go-wasm.wasm">
-      <HashRouter>
-        <App />
-      </HashRouter>
-    </WasmProvider>
+    <NotificationsProvider>
+      <WasmProvider onFailure={(e) => console.error("Failed to load WASM ", e)} fetchParams="go-wasm.wasm">
+        <HashRouter>
+          <App />
+        </HashRouter>
+      </WasmProvider>
+    </NotificationsProvider>
   </React.StrictMode>
 );
 
