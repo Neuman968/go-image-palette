@@ -15,7 +15,6 @@ function GradientCircularProgress() {
                         <stop offset="75%" stopColor="indigo" />
                         <stop offset="90%" stopColor="violet" />
                         <stop offset="100%" stopColor="red" />
-
                     </linearGradient>
                 </defs>
             </svg>
@@ -29,7 +28,7 @@ function GradientCircularProgress() {
 
 function LoadingPage() {
 
-
+    console.log("Rendering Loading Page.")
     return (
         <Stack spacing={6} sx={{
             marginTop: '20vh',

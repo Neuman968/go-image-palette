@@ -1,5 +1,4 @@
 import { Badge, Card, CardContent, IconButton } from '@mui/material'
-import React from 'react'
 import ModeEditOutlineIcon from '@mui/icons-material/ModeEditOutline';
 type Props = {
     color: string,

@@ -55,9 +55,12 @@ function App() {
 
   const notifications = useNotifications()
 
+  const [loading, setLoading] = React.useState(false)
+
   const setFileAndProcess = (file: File) => {
     setFile(file)
-    file.arrayBuffer().then((arr: ArrayBuffer) => {
+    setLoading(true)
+    return file.arrayBuffer().then((arr: ArrayBuffer) => {
       const resultJson = loadedWasm?.PaletteFromImage(new Uint8Array(arr))
       if (resultJson) {
         const imagePaletteResp = JSON.parse(resultJson)
@@ -66,18 +69,20 @@ function App() {
             severity: 'error',
             autoHideDuration: 3000,
           });
-          return
+          setLoading(false)
+        } else {
+          setImagePalette(imagePaletteResp)
+          setPalette(getPaletteStateFromImage(imagePaletteResp))
         }
-        setImagePalette(imagePaletteResp)
-        setPalette(getPaletteStateFromImage(imagePaletteResp))
-      } else {
       }
+      setLoading(false)
       navigate('/view')
     }).catch((err) => {
       notifications.show(`Error Loading Image ${err}`, {
         severity: 'error',
         autoHideDuration: 3000,
       });
+      setLoading(false)
       console.error(err)
     })
   }
@@ -98,7 +103,7 @@ function App() {
   return <ThemeProvider theme={theme}>
     <Heading />
     <Routes>
-      <Route index element={<UploadPhotoDisplay setFile={setFileAndProcess} />} />
+      <Route index element={<UploadPhotoDisplay loading={loading} setFile={setFileAndProcess} />} />
       <Route path="/examples" element={<></>} />
       <Route path="/loading" element={<LoadingPage />} />
       <Route path="/view" element={<ImagePalettePage file={file!!} imagePalette={imagePalette!!}
@@ -106,7 +111,7 @@ function App() {
         setPalette={setPalette}
       // setImagePalette={setImagePalette}
       />} />
-      <Route path="*" element={<UploadPhotoDisplay setFile={setFileAndProcess} />} />
+      <Route path="*" element={<UploadPhotoDisplay loading={loading} setFile={setFileAndProcess} />} />
     </Routes>
   </ThemeProvider>
 
