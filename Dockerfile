@@ -30,5 +30,9 @@ FROM nginx:1.27-alpine
 COPY nginx-rewrite.conf /etc/nginx/conf.d/default.conf
 COPY --from=web-deps /usr/src/app/build /usr/share/nginx/html
 
+# Move static files to a separate directory
+RUN mkdir /usr/share/nginx/html/go-image-palette
+RUN mv /usr/share/nginx/html/static /usr/share/nginx/html/go-image-palette/static
+
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
