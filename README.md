@@ -17,3 +17,17 @@ GOOS=js GOARCH=wasm go build -o ../public/go-wasm.wasm
 
 This will move the compiiled wasm binary to the public folder of the React project in the parent folder.
 
+## Running locally with Docker
+
+To run locally, build a docker image. 
+
+```bash
+docker build -t go-image-palette .
+```
+Once complete, run the image.
+
+```bash
+docker run -p "8080:80" go-image-palette
+```
+
+navigate to `http://localhost:8080` in your browser to use the app!
